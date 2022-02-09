@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.NoticeMapper">
+	<resultMap type="com.ktds.biz.model.AI_PAGE" id="page">
+		<result column="page" property="page" />
+		<result column="page_st" property="page_st" />
+		<result column="page_end" property="page_end" />
+		<result column="code" property="cam_id" />
+	</resultMap>
+
+	<select id="selectAllNoticeList" resultType="notice">
+		SELECT
+		CODE AS
+		"code",
+		TITLE AS "title",
+		CONTENTS AS "contents",
+		WRITER AS "writer",
+		REG_DATETIME AS "reg_datetime"
+		FROM
+		t_NOTICE
+		ORDER BY
+		reg_datetime DESC
+	</select>
+
+	<select id="selectNoticeList" resultType="notice">
+		SELECT
+		CODE AS "code",
+		TITLE AS "title",
+		CONTENTS AS "contents",
+		WRITER AS
+		"writer",
+		REG_DATETIME AS "reg_datetime"
+		FROM
+		t_NOTICE
+		<where>
+			<if test="title != null and title != '' ">
+				title like '%' || #{title} || '%'
+			</if>
+
+			<if test="writer != null and writer != '' ">
+				AND type writer '%' || #{writer} || '%'
+			</if>
+
+			<if test="reg_datetime != null and reg_datetime != '' ">
+				AND reg_datetime like '%' || #{reg_datetime} || '%'
+			</if>
+		</where>
+		ORDER BY
+		reg_datetime DESC
+	</select>
+
+	<select id="selectNoticeDetail" resultType="notice">
+		SELECT
+		CODE AS "code",
+		TITLE AS "title",
+		CONTENTS AS "contents",
+		WRITER AS "writer",
+		REG_DATETIME AS "reg_datetime"
+		FROM
+		t_NOTICE
+		WHERE
+		code = #{code}
+	</select>
+
+	<insert id="insertNotice">
+		INSERT INTO t_NOTICE (CODE, TITLE, CONTENTS, WRITER,
+		REG_DATETIME)
+		VALUES ((SELECT COALESCE(MAX(code + 1),1) FROM t_NOTICE), #{title},
+		#{contents},
+		#{writer}, now())
+	</insert>
+	
+	<update id="updateNotice">
+		update t_notice set title=#{title}, contents=#{contents} where code=#{code}
+	</update>
+
+	<delete id="deleteNotice">
+		DELETE FROM t_NOTICE
+		WHERE
+		code = #{code}
+	</delete>
+
+	<select id="selectNoticePage" resultType="notice">
+		select *
+		from (
+		select <![CDATA[(ROW_NUMBER() OVER()) as rnum ]]>
+		, A.CODE, A.TITLE, A.CONTENTS, A.WRITER, A.REG_DATETIME
+		from
+		(
+		select
+			CODE,
+			TITLE,
+			CONTENTS,
+			WRITER,
+			REG_DATETIME
+		from t_NOTICE
+		order by REG_DATETIME desc
+		) A
+		LIMIT cast(#{page_end} as numeric)
+		) B
+		where b.rnum >= cast(#{page_st} as numeric)
+	</select>
+
+	<select id="selectNoticePageNum" resultType="int">
+		select count(*) as
+		totalCount from t_NOTICE
+	</select>
+
+</mapper>	

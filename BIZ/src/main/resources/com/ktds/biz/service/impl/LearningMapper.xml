@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.LearningMapper">
+
+    <select id="getLearning_info" resultType="learning_info">
+		select  
+		    MODEL.TRAIN_METHOD as "train_method",
+		    MODEL.ORIGINAL_ACC as "original_acc",
+		    MODEL.SO_ACC as "so_acc",
+		    MODEL.MODEL_DIR as "model_dir",
+		    MODEL.MODEL_NAME  as "model_name"
+		from 
+		    t_src CAMP,
+		    t_TRAIN_MODEL MODEL
+		where
+		    CAMP.src_ID = MODEL.src_ID
+    	 <if test="cam_id != null">
+		 	AND  MODEL.src_ID = #{cam_id}
+		 </if>
+		 ORDER BY MODEL.SO_ACC DESC
+    </select>
+    
+    
+    <select id="getLearning_res" resultType="learning_res">
+		select  
+		    CAMP.src_ID as "cam_id",
+		    FEATURE.TRAIN_METHOD as "train_method",
+		    FEATURE.FEATURE_NAME as "feature_name",
+		    FEATURE.WEIGHT as "weight"
+		from 
+		    t_src CAMP,
+		    t_TRAIN_MODEL MODEL,
+		    t_MODEL_FEATURE FEATURE
+		where
+		    CAMP.src_ID = MODEL.src_ID
+		   AND CAMP.src_ID = FEATURE.src_ID
+    	 <if test="train_method != null and train_method != ''">
+		   AND FEATURE.TRAIN_METHOD = #{train_method}
+		 </if>
+    	 <if test="cam_id != null and cam_id != ''">
+		 	AND  CAMP.src_ID = #{cam_id}
+		 </if>
+		 order by 
+		 	FEATURE.WEIGHT desc
+		 LIMIT 10
+    </select>
+    
+    
+    <select id="getLearning_feature" >
+		select  
+		    feat.train_method as "train_method",
+		    feat.feature_name as "feature_name",
+		    feat.weight as "weight"
+		from 
+		    ai_train_model_feature feat
+		where
+		    feat.camp_id = '1004'
+    </select>
+    
+    <select id="getLearningResultList" resultType="model">
+    	select src_id, 
+		       train_method,
+		       ROUND(cast(original_acc as numeric) * 100, 2) as original_acc, 
+		       ROUND(cast(so_acc as numeric) * 100, 2) as so_acc,             
+		       train_start, 
+		       train_end, 
+		       model_flg, 
+		       desc_text 
+		from t_train_model
+		where src_id = #{cam_id}
+		order by so_acc desc
+    </select>
+    
+    <select id="getLearningWeighting" resultType="learning_res">
+    	select src_id, train_method, feature_name, weight
+	    from t_model_feature
+	    where src_id = #{cam_id} and train_method = #{train_method}
+	    order by weight desc
+	   	limit 10
+    </select>
+
+</mapper>

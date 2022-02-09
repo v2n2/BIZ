@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.CampaignMapper">
+    <sql id="inputParam">
+    	<if test='(src_name != null) and !(src_name eq "".toString())'>
+			AND SRC_NAME LIKE #{src_name}
+		</if>
+		<if test='(src_type != null) and !(src_type eq "".toString()) and !(src_type eq "ALL".toString())'>
+			AND SRC_TYPE = #{src_type}
+		</if>
+		<if test='(status_cd != null) and !(status_cd eq "".toString()) and !(status_cd eq "ALL".toString())'>
+			AND STATUS_CD = #{status_cd}
+		</if>
+    </sql> 
+     
+    <select id="selectCampaignPage" resultType="campaign">
+		select * 
+			from (
+			    select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]> ,  A.src_id, A.src_name, A.adm_id, A.src_type, A.status_cd, A.created, A.desc_text 
+			    from
+			        (
+			          select src_id, src_name, adm_id, src_type, status_cd, created, desc_text  
+			         from t_src 
+			         where adm_id = #{adm_id} order by created desc 
+			         ) A
+			   LIMIT <![CDATA[ cast(#{page_end} as numeric)]]> 
+			    ) B
+		where b.rnum >= <![CDATA[ cast(#{page_st} as numeric)]]>
+    </select>
+     
+    <select id="selectCamPageNum" resultType="int">
+		select count(*) as totalCount from t_src where adm_id = #{adm_id}
+    </select>
+    
+    <select id="selectCampaignSeq" resultType="campaign">
+    	select cam_seq.nextval as "cam_seq" from dual
+    </select>
+    
+    <select id="selectCampaignAiStatus" resultType="campaign">  
+	    select src_id, status_cd, desc_text
+	      from t_src
+	     where src_id = #{src_id}
+    </select>	
+    
+    <insert id="insertCampaign">
+	    WITH newSrc AS (
+	    	insert into t_src(src_id, adm_id, src_name, desc_text, src_type, status_cd) 
+			values ( cast('1-' as varchar) || LPAD(cast(nextval('src_seq') as varchar),5,'0'), #{adm_id}, #{src_name}, #{desc_text}, #{src_type},'File Upload') RETURNING src_id
+		), newTrain AS(
+			insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text) 
+				select src_id, #{file_t_type} as file_type, #{file_t_name} as file_name, #{file_dir}, 'Y', #{desc_text}
+				from newSrc
+		)
+		insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text) 
+			select src_id, #{file_p_type} as file_type, #{file_p_name} as file_name, #{file_dir}, 'Y', #{desc_text}
+			from newSrc	
+		
+	</insert>
+    
+    <insert id="insertCampaignFile">
+	    insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text) 
+		values ( #{src_id}, #{file_type}, #{file_name}, #{file_dir}, 'Y', #{desc_text})
+	</insert>
+    
+	<!-- 파라메터 존재하는 캠페인 쿼리 -->
+	<select id="selectNewCampaignPage" resultType="campaign">
+		select * 
+			from (
+			    select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>, A.src_id, A.src_name, A.adm_id, A.src_type, A.status_cd, A.created, A.desc_text
+			    from
+			        (
+				         select src_id, src_name, adm_id, src_type, status_cd, created, desc_text
+				         from t_src
+				         
+				         where adm_id = #{adm_id}
+				         	
+				         <include refid="inputParam"></include>
+				          
+				         order by created desc 
+			         ) A
+			  LIMIT <![CDATA[ cast(#{listEnd} as numeric)]]> 
+			    ) B
+		where B.rnum >= <![CDATA[ cast(#{listStart} as numeric)]]>
+	</select>
+	
+	<!-- 파라메터 존재하는 캠페인 총 갯수 쿼리 -->
+	<select id="selectCamCount" resultType="int">
+		select count(*) as totalCount 
+		from t_src
+		where adm_id = #{adm_id}
+		
+		<include refid="inputParam"></include>
+    </select>
+    
+    <select id="selectLastOne" resultType="String">
+		select src_id 
+		from t_src
+		where adm_id = #{adm_id}
+		order by created desc
+		limit 1
+    </select>
+    
+     <insert id="insertCampaignRtype">
+   	   WITH updSrc AS (
+	    	update t_src_file
+    	       set active_flg= 'N'
+    	     where src_id = #{src_id}
+    	       and active_flg = 'Y'
+    	       and file_type = 'REAL'
+			RETURNING *
+		)insert into t_src_file(src_id, #{file_r_type}, #{file_r_name}, #{file_dir}, 'Y', '', wave_num+1) 
+		
+		
+		
+    </insert>
+    
+    <update id="updateCampaignTType">
+    	WITH updSrc AS (
+	    	update t_src
+    	       set status_cd = 'File Upload'
+    	     where src_id = #{src_id}
+			RETURNING src_id
+		)
+			insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text, wave_num) 
+				select src_id, #{file_t_type} as file_type, #{file_t_name} as file_name, #{file_dir}, 'Y' as active_flg, desc_text, wave_num+1 
+				  from t_src_file 
+				 where src_id = #{src_id} and file_type = #{file_t_type} 
+				order by created desc 
+				limit 1
+    </update>
+    
+    
+    <update id="updateCampaignPType">
+    	WITH updSrc AS (
+	    	update t_src
+    	       set status_cd = 'File Upload'
+    	     where src_id = #{src_id}
+			RETURNING src_id
+		)insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text, wave_num) 
+				select src_id, #{file_p_type} as file_type, #{file_p_name} as file_name, #{file_dir}, 'Y' as active_flg, desc_text, wave_num+1 
+				  from t_src_file 
+				 where src_id = #{src_id} and file_type = #{file_p_type} 
+				order by created desc 
+				limit 1
+    </update>
+    
+     <update id="updateCampaignAllType">
+    	WITH updSrc AS (
+	    	update t_src
+    	       set status_cd = 'File Upload'
+    	     where src_id = #{src_id}
+			RETURNING src_id
+		), updTrain AS(
+			insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text, wave_num) 
+				select src_id, #{file_t_type} as file_type, #{file_t_name} as file_name, #{file_dir}, 'Y' as active_flg, desc_text, wave_num+1 
+				  from t_src_file 
+				 where src_id = #{src_id} and file_type = #{file_t_type} 
+				order by created desc 
+				limit 1
+		)
+		insert into t_src_file(src_id, file_type, file_name, file_dir, active_flg, desc_text, wave_num) 
+				select src_id, #{file_p_type} as file_type, #{file_p_name} as file_name, #{file_dir}, 'Y' as active_flg, desc_text, wave_num+1 
+				  from t_src_file 
+				 where src_id = #{src_id} and file_type = #{file_p_type} 
+				order by created desc 
+				limit 1 
+    </update>
+    <!-- 캠페인 예측 경로 가져오기 -->
+	<select id="selectPredictPath" resultType="campaign">
+		select pred_dl_file_path, pred_ml_file_path
+		from t_src_file
+		where src_id = #{src_id}
+		  and file_type = 'PREDICT'
+    </select>
+</mapper>

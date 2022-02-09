@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.PretreatmentMapper">
+
+    <select id="selectAllcampaign" resultType="campaign">
+		select 
+		  cam.cam_id as "cam_id",
+		  cam.cam_name as "cam_name",
+		  cam.adm_id as "adm_id",
+		  cam.cam_type as "cam_type",
+		  cam.cam_status as "cam_status",
+		  cam.cam_itype as "cam_itype",
+		  cam.cam_autoyn as "cam_autoyn",
+		  cam.cam_icnum as "cam_icnum",
+		  cam.cam_ifilename as "cam_ifilename",
+		  cam.cam_idate as "cam_idate",
+		  cam.cam_otype as "cam_otype",
+		  cam.cam_ofilename as "cam_ofilename",
+		  cam.cam_cdate as "cam_cdate",
+		  cam.cam_desc as "cam_desc",
+		  cam.cam_msg as "cam_msg"
+		from 
+		  ai_campaign cam
+		  
+		order by cam.cam_cdate desc
+    </select>
+
+
+	<select id="selectCampaign" resultType="campaign">
+		<!-- 
+			select * from members where or email like '%%' 
+			이런식으로 where 절 다음에 or 절을 작성할경우 sql 문법에는 맞지않으나 
+			MyBatis 에서 자동으로 삭제해줌
+	    -->
+		select 
+		  cam.cam_id as "cam_id",
+		  cam.cam_name as "cam_name",
+		  cam.adm_id as "adm_id",
+		  cam.cam_type as "cam_type",
+		  cam.cam_status as "cam_status",
+		  cam.cam_itype as "cam_itype",
+		  cam.cam_autoyn as "cam_autoyn",
+		  cam.cam_icnum as "cam_icnum",
+		  cam.cam_ifilename as "cam_ifilename",
+		  cam.cam_idate as "cam_idate",
+		  cam.cam_otype as "cam_otype",
+		  cam.cam_ofilename as "cam_ofilename",
+		  cam.cam_cdate as "cam_cdate",
+		  cam.cam_desc as "cam_desc",
+		  cam.cam_msg as "cam_msg"
+		from 
+		  ai_campaign cam
+		<where>
+			<if test="cam_name != null and cam_name != '' ">
+				cam_name like '%' || #{cam_name} || '%'
+			</if>
+			
+			<if test="cam_type != null and cam_type != '' ">
+				AND cam_type like '%' || #{cam_type} || '%'
+			</if>
+			
+			<if test="cam_status != null and cam_status != '' ">
+				AND cam_status like '%' || #{cam_status} || '%'
+			</if>
+			
+			<if test="adm_id != null and adm_id != '' ">
+				AND adm_id like '%' || #{adm_id} || '%'
+			</if>
+		</where>
+		order by cam.cam_cdate desc
+    </select>
+    
+
+</mapper>

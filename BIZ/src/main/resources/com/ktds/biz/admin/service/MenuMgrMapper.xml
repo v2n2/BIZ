@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.admin.service.MenuMgrMapper">
+
+	
+<!--      <select id="selectCheckPK" resultType="int">
+			SELECT count(*)
+		FROM  
+			t_ACCOUNT
+		WHERE
+			adm_id =  #{adm_id}
+    </select>
+    -->
+    <insert id="insertMenu">
+    	INSERT INTO S_MENU (MENU_NO, PAR_MENU_NO, MENU_NAME, MENU_URL, BSE_DT, BSE_TM, BSE_EMP_NO, ALT_DT, ALT_TM, ALT_EMP_NO)
+      	VALUES (#{menu_no}, #{par_menu_no}, #{menu_name}, #{menu_url}, DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no})
+    </insert>
+	
+	<update id="updateMenuByNo">
+	update S_MENU 
+		set 
+		<if test='par_menu_no == null or par_menu_no == "" or par_menu_no == 0'>
+		 	PAR_MENU_NO = null
+		</if>
+		<if test='par_menu_no != null and par_menu_no != "" and par_menu_no != 0'>
+		 	PAR_MENU_NO = #{par_menu_no}
+		</if>
+		, MENU_NAME=#{menu_name}
+		, MENU_URL=#{menu_url}
+		, ALT_DT=DATE_FORMAT(now(), '%Y%m%d')
+		, ALT_TM=DATE_FORMAT(now(), '%H%i%s') 
+	where MENU_NO=#{menu_no}
+	</update>
+
+    
+    <delete id="deleteMenuByNo">
+    	DELETE FROM S_MENU
+    	WHERE 
+    		menu_no =  #{menu_no}
+    </delete>
+    
+    <!--
+    <select id="selectAccountPage" resultType="account">
+		select *
+		from (
+		select <![CDATA[ rownum as rnum ]]>
+		, A.ADM_ID, A.ADM_PW, A.ADM_NAME, A.ADM_EMAIL, A.created, A.ADM_TYPE
+		from
+		(
+		select
+			ADM_ID, 
+			ADM_PW,
+			ADM_NAME,
+			ADM_EMAIL,
+			ADM_CDATE,
+			ADM_TYPE
+		from t_ACCOUNT
+		order by created desc
+		) A
+		where <![CDATA[ rownum <= #{page_end} ]]>
+		) B
+		where b.rnum >= #{page_st}
+	</select>
+
+	<select id="selectAccountPageNum" resultType="int">
+		select count(*) as
+		totalCount from t_ACCOUNT
+	</select> -->
+	
+	
+</mapper>	

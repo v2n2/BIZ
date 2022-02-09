@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.admin.service.UserMgrMapper">
+
+    <insert id="insertUser">
+    	INSERT INTO S_USER 
+      	VALUES (#{emp_no}, #{emp_password}, #{dept_name}, #{emp_name},#{tel_no}, DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no})
+      	ON DUPLICATE KEY 
+      	UPDATE emp_password = #{emp_password}
+      		   ,dept_name = #{dept_name}
+      		   ,emp_name= #{emp_name}
+      		   ,tel_no = #{tel_no}
+      		   ,alt_dt = DATE_FORMAT(now(), '%Y%m%d')
+      		   ,alt_tm = DATE_FORMAT(now(), '%H%i%s')
+      		   ,alt_emp_no = #{rgs_emp_no};
+    </insert>
+	
+    <delete id="deleteUserByNo">
+    	DELETE FROM S_USER
+    	WHERE 
+    		EMP_NO =  #{emp_no}
+    </delete>
+    
+
+    <select id="selectUserPage" resultType="com.ktds.biz.admin.model.User">
+		select *
+		from (
+			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
+			, A.EMP_NO
+			, A.EMP_PASSWORD
+			, IFNULL( A.DEPT_NAME,'') as DEPT_NAME
+			, A.EMP_NAME
+			, A.TEL_NO
+			, A.BSE_DT
+			from
+			(
+				select
+					EMP_NO, 
+					EMP_PASSWORD,
+					DEPT_NAME,
+					EMP_NAME,
+					TEL_NO,
+					BSE_DT
+				from S_USER
+				order by BSE_DT desc
+			) A
+			LIMIT #{page_end}
+		) B
+		where B.rnum >= #{page_st}
+	</select>
+
+	<select id="selectUserPageNum" resultType="int">
+		select count(*) as
+		totalCount from S_USER
+	</select>
+	
+	
+</mapper>	

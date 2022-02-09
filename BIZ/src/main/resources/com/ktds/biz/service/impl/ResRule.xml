@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.PretreatmentMapper">
+
+    <select id="selectAllcampaign" resultType="campaign">
+		SELECT 
+		    row_id AS "row_id", 
+		    name AS "name", 
+		    type AS "type", 
+		    status AS "status", 
+		    start_date AS "start_date", 
+		    end_date AS "end_date", 
+		    created_by AS "created_by", 
+		    created AS "created", 
+		    last_upd AS "last_upd", 
+		    (select count(*) from ds_cam_accnt where cam_id = row_id) as "cam_count", 
+		    data_status AS "data_status", 
+		    data_st_date AS "data_st_date", 
+		    data_en_date AS "data_en_date" 
+		from 
+		    DS_CAMPAIGN
+    </select>
+
+
+	<select id="selectCampaign" resultType="campaign">
+		<!-- 
+			select * from members where or email like '%%' 
+			이런식으로 where 절 다음에 or 절을 작성할경우 sql 문법에는 맞지않으나 
+			MyBatis 에서 자동으로 삭제해줌
+	    -->
+		SELECT 
+		    row_id AS "row_id", 
+		    name AS "name", 
+		    type AS "type", 
+		    status AS "status", 
+		    start_date AS "start_date", 
+		    end_date AS "end_date", 
+		    created_by AS "created_by", 
+		    created AS "created", 
+		    last_upd AS "last_upd", 
+		    (select count(*) from ds_cam_accnt where cam_id = row_id) as "cam_count", 
+		    data_status AS "data_status", 
+		    data_st_date AS "data_st_date", 
+		    data_en_date AS "data_en_date" 
+		from 
+		    DS_CAMPAIGN
+		<where>
+			<if test="name != null and name != '' ">
+				name like '%' || #{name} || '%'
+			</if>
+			
+			<if test="type != null and type != '' ">
+				AND type like '%' || #{type} || '%'
+			</if>
+			
+			<if test="status != null and status != '' ">
+				AND status like '%' || #{status} || '%'
+			</if>
+			
+			<if test="created_by != null and created_by != '' ">
+				AND created_by like '%' || #{created_by} || '%'
+			</if>
+		
+		</where>
+    </select>
+
+</mapper>

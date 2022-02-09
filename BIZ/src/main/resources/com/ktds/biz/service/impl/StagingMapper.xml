@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.StagingMapper">
+	<select id="selectStagingTrainCnt" resultType="int">
+		select count(*) as totalCount 
+		from ai_staging_train
+		where cam_id = #{cam_id}
+	</select>
+
+    <select id="selectStaginTrain" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select  <![CDATA[ rownum as rnum ]]> , A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_train
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{page_end} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{page_st} ]]> 
+    </select>
+    
+    <select id="selectStagingTrainList" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select rownum as rnum, A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_train
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{listEnd} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{listStart} ]]> 
+    </select>
+    
+    <select id="selectStagingTrainResultCnt" resultType="int">
+    	select count(*) as totalCount 
+		from ai_staging_train_result
+		where cam_id = #{cam_id}
+    </select>
+    
+    <select id="selectStaginTrainResult" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select  <![CDATA[ rownum as rnum ]]> , A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_train_result
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{page_end} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{page_st} ]]> 
+    </select>
+    
+    <select id="selectStagingTrainResultList" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select rownum as rnum, A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_train_result
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{listEnd} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{listStart} ]]> 
+    </select>
+    
+    <select id="selectStagingTestCnt" resultType="int">
+		select count(*) as totalCount 
+		from ai_staging_test
+		where cam_id = #{cam_id}
+	</select>
+    
+    <select id="selectStaginTest" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select  <![CDATA[ rownum as rnum ]]> , A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_test
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{page_end} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{page_st} ]]> 
+    </select>
+    
+    <select id="selectStagingTestList" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select rownum as rnum, A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_test
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{listEnd} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{listStart} ]]> 
+    </select>
+    
+    <select id="selectStagingTestResultCnt" resultType="int">
+    	select count(*) as totalCount 
+		from ai_staging_test_result
+		where cam_id = #{cam_id}
+    </select>
+    
+    <select id="selectStaginTestResult" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select  <![CDATA[ rownum as rnum ]]> , A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_test_result
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{page_end} ]]> 
+		    ) B
+		where <![CDATA[  b.rnum >= #{page_st}  ]]> 
+    </select>
+    
+    <select id="selectStagingTestResultList" resultType="staging">
+		select st_seq, cam_id, st_c1, st_c2, st_c3, st_c4, st_c5, st_c6, st_c7, st_c8, st_c9, st_c10, st_c200  
+		   from (		
+		        select rownum as rnum, A.* 
+		        from       
+		        (
+		        select 
+					*  
+				from 
+					ai_staging_test_result
+				where  
+					cam_id = #{cam_id} order by st_seq desc
+		        ) A
+		        where <![CDATA[ rownum <= #{listEnd} ]]> 
+		    ) B
+		where <![CDATA[ b.rnum >= #{listStart} ]]> 
+    </select>
+    
+    <select id="selectTestPredict" resultType="staging">
+		select st_seq, 
+		       cam_id, 
+		       st_c1, 
+		       train_method, 
+		       predict, 
+		       succ_prob,  
+		       fail_prob  
+		   from (		
+		        select rownum as rnum, A.* 
+		        from       
+		        (
+		        select 
+		            pre.st_seq as st_seq, 
+		            pre.cam_id as cam_id, 
+		            test.st_c1 as st_c1, 
+		            pre.train_method as train_method, 
+		            pre.predict as predict, 
+		            round(pre.SUCC_PROB * 100, 2) as succ_prob,  
+		            round(pre.FAIL_PROB * 100, 2) as fail_prob  
+		        from 
+		            ai_test_predict pre, ai_staging_test test
+		        where  
+		            pre.st_seq = test.st_seq
+		            and pre.cam_id = #{cam_id}
+		            order by pre.st_seq
+		        ) A
+		        where 
+		        <if test="succVal != null and succVal != ''">
+		        	<![CDATA[ succ_prob >= #{succVal} and ]]>
+		        </if>
+		         <![CDATA[ rownum <= #{page_end} ]]> 
+		    ) B
+		    
+		where <![CDATA[ b.rnum >= #{page_st}  ]]> 
+    </select>
+    
+
+</mapper>

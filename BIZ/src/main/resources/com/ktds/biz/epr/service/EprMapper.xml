@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.epr.service.EprMapper">
+
+	
+    <select id="selectEprPageNum" resultType="_int">
+	  SELECT count(1)
+		FROM  
+			S_EPR a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+		WHERE
+		     1=1
+		<!-- 기업명  -->
+		<if test='epr_name != null and epr_name != ""'>
+		 	AND a.EPR_NAME LIKE CONCAT('%',#{epr_name},'%')
+		</if>
+    </select>
+    
+    <select id="SearchEprDtl" resultType="com.ktds.biz.epr.model.Epr_sub01">
+ 		 SELECT a.epr_no  as epr_no
+			  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+			  		,a.epr_name as epr_name
+			  		,c.grp_dtl_name as epr_biz_type_cd_nm
+			  		,a.epr_rep_name as epr_rep_name
+			  		,a.epr_tel_no as epr_tel_no
+			  		,a.epr_addr as epr_addr
+			  		,a.biz_num as biz_num
+			  		,a.epr_biz_type_cd as epr_biz_type_cd
+			  		,b.emp_name as bse_emp_nm
+			  		,a.bse_emp_no as bse_emp_no
+			  		,a.corp_regist_num as corp_regist_num
+			  		,a.bse_dt as bse_dt
+				FROM  
+					S_EPR a
+					left outer join S_USER b
+					on a.bse_emp_no = b.emp_no
+					left outer join S_GRP_DTL_CD c
+					on c.GRP_CD = 'EPR_BIZ_TYPE_CD'
+					and a.epr_biz_type_cd = c.grp_dtl_cd 
+				WHERE
+				    1=1
+				and a.epr_no = #{epr_no}
+    </select>
+
+    <insert id="insertEpr">
+    	INSERT INTO S_EPR (EPR_NAME, EPR_REP_NAME, EPR_TEL_NO, EPR_BIZ_TYPE_CD, EPR_ADDR, BIZ_NUM, CORP_REGIST_NUM, bse_dt, bse_tm, bse_emp_no, alt_dt, alt_tm, alt_emp_no)
+      	VALUES ( #{epr_name}, #{epr_rep_name},#{epr_tel_no},#{epr_biz_type_cd},#{epr_addr},#{biz_num},#{corp_regist_num}, DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{bse_emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{bse_emp_no})
+    </insert>
+    <update id="updateEprByNo">
+    	UPDATE S_EPR
+    	   SET epr_name = #{epr_name}
+      		   ,epr_rep_name = #{epr_rep_name}
+      		   ,epr_tel_no= #{epr_tel_no}
+      		   ,epr_biz_type_cd = #{epr_biz_type_cd}
+      		   ,epr_addr = #{epr_addr}
+      		   ,biz_num = #{biz_num}
+      		   ,corp_regist_num = #{corp_regist_num}
+      		   ,alt_dt = DATE_FORMAT(now(), '%Y%m%d')
+      		   ,alt_tm = DATE_FORMAT(now(), '%H%i%s')
+      		   ,alt_emp_no = #{bse_emp_no}
+    	 WHERE epr_no = #{epr_no}  
+    </update>
+    <delete id="deleteEprByNo">
+    	DELETE FROM S_EPR
+    	WHERE 
+    		epr_no =  #{epr_no}
+    </delete>
+    
+    <select id="selectEprPage" resultType="com.ktds.biz.epr.model.Epr_sub01">
+		select *
+		from (
+			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
+			,aa.epr_no  as epr_no
+	  		,aa.bse_dt as bse_dt
+	  		,aa.epr_name as epr_name
+	  		,aa.epr_rep_name as epr_rep_name
+	  		,aa.epr_tel_no as epr_tel_no
+	  		,aa.epr_biz_type_cd as epr_biz_type_cd
+	  		,aa.epr_biz_type_cd_nm as epr_biz_type_cd_nm
+	  		,aa.epr_addr as epr_addr
+	  		,aa.biz_num as biz_num
+	  		,aa.emp_name as bse_emp_nm
+	  		,aa.bse_emp_no as bse_emp_no
+	  		,aa.corp_regist_num as corp_regist_num
+			from
+			(
+				 SELECT a.epr_no  as epr_no
+			  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+			  		,a.epr_name as epr_name
+			  		,c.grp_dtl_name as epr_biz_type_cd_nm
+			  		,a.epr_rep_name as epr_rep_name
+			  		,a.epr_tel_no as epr_tel_no
+			  		,a.epr_addr as epr_addr
+			  		,a.biz_num as biz_num
+			  		,a.epr_biz_type_cd as epr_biz_type_cd
+			  		,b.emp_name as emp_name
+			  		,a.bse_emp_no as bse_emp_no
+			  		,a.corp_regist_num as corp_regist_num
+				FROM  
+					S_EPR a
+					left outer join S_USER b
+					on a.bse_emp_no = b.emp_no
+					left outer join S_GRP_DTL_CD c
+					on c.GRP_CD = 'EPR_BIZ_TYPE_CD'
+					and a.epr_biz_type_cd = c.grp_dtl_cd 
+				WHERE
+				    1=1
+				<!-- 기업명  -->
+				<if test='epr_name != null and epr_name != ""'>
+				 	
+				 	AND a.EPR_NAME LIKE CONCAT('%',#{epr_name},'%')
+				</if>
+			) aa
+			LIMIT #{page_end}
+		) dd
+		where dd.rnum >= #{page_st}
+		order by dd.BSE_DT desc
+	</select>
+
+</mapper>	

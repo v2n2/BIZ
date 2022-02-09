@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.admin.service.CommonCodeMapper">
+
+	
+      <select id="searchCode" resultType="com.ktds.biz.admin.model.CommonCode">
+		SELECT *
+		FROM
+		 (
+		 SELECT <![CDATA[(ROW_NUMBER() OVER()) as rnum ]]>
+		 		,A.grp_cd
+				,A.grp_name
+				,A.grp_desc
+				,A.del_yn
+		 FROM				
+			(
+			  SELECT 
+					grp_cd
+					,grp_name
+					,grp_desc
+					,del_yn
+				FROM  
+					S_GRP_CD
+			ORDER BY ALT_DT DESC
+			) A
+		LIMIT #{page_end}
+		) B
+		where B.rnum >= #{page_st} 
+    </select>
+    
+    <select id="searchDtlCode" resultType="com.ktds.biz.admin.model.CommonDtlCode">
+			SELECT *
+		FROM
+		 (
+		 SELECT <![CDATA[(ROW_NUMBER() OVER()) as rnum ]]>
+		 		,A.grp_dtl_cd
+				,A.grp_dtl_name
+				,A.grp_dtl_desc
+				,A.del_yn
+				,A.grp_cd
+			FROM				
+			(
+			  SELECT 
+					grp_dtl_cd
+					,grp_dtl_name
+					,grp_dtl_desc
+					,del_yn
+					,grp_cd
+				FROM  
+					S_GRP_DTL_CD
+				WHERE
+					GRP_CD = #{grp_cd}
+			) A
+			ORDER BY A.grp_dtl_cd*1 ASC
+			LIMIT #{page_end}
+		) B
+		where B.rnum >= #{page_st} 		
+    </select>
+ 	<select id="searchDtlCode2" resultType="com.ktds.biz.admin.model.CommonDtlCode">
+			SELECT 
+				*
+			FROM  
+				S_GRP_DTL_CD
+			WHERE
+				GRP_CD = #{grp_cd}
+			ORDER BY GRP_DTL_CD *1 ASC
+	    
+    </select>
+    <insert id="insertCode">
+    	INSERT INTO S_GRP_CD 
+      	VALUES (#{grp_cd},#{grp_name},#{grp_desc},#{del_yn},DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no},DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no});
+      	
+    </insert>
+	
+	<update id="updateCode">
+		UPDATE S_GRP_CD 
+		   SET GRP_NAME=#{grp_name},
+		   	   GRP_DESC=#{grp_desc},
+		   	   DEL_YN=#{del_yn},
+		       ALT_DT=DATE_FORMAT(now(), '%Y%m%d'), 
+		       ALT_TM=DATE_FORMAT(now(), '%H%i%s'),
+		       ALT_EMP_NO=#{emp_no}
+		 WHERE GRP_CD=#{grp_cd}
+	</update>
+
+    
+    <delete id="deleteCode">
+    	DELETE FROM S_GRP_CD
+    	WHERE 
+    		GRP_CD =  #{grp_cd}
+    </delete>
+    
+    <insert id="insertDtlCode">
+    	INSERT INTO S_GRP_DTL_CD 
+      	VALUES (#{grp_dtl_cd},#{grp_dtl_name},#{grp_dtl_desc},#{grp_cd},#{del_yn},DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no},DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no});
+    </insert>
+	
+	<update id="updateDtlCode">
+		UPDATE S_GRP_DTL_CD 
+		   SET GRP_DTL_NAME=#{grp_dtl_name},
+		   	   GRP_DTL_DESC=#{grp_dtl_desc},
+		   	   DEL_YN=#{del_yn},
+		       ALT_DT=DATE_FORMAT(now(), '%Y%m%d'), 
+		       ALT_TM=DATE_FORMAT(now(), '%H%i%s'),
+		       ALT_EMP_NO=#{emp_no}
+		 WHERE GRP_CD=#{grp_cd}
+		 <if test='grp_dtl_cd != null and grp_dtl_cd !=""'>
+		   and GRP_DTL_CD=#{grp_dtl_cd}
+		  </if>
+	</update>
+
+    
+    <delete id="deleteDtlCode">
+    	DELETE FROM S_GRP_DTL_CD
+    	WHERE 
+    		GRP_CD =  #{grp_cd}
+    	<if test='grp_dtl_cd != null and grp_dtl_cd !=""'>
+    	  and GRP_DTL_CD = #{grp_dtl_cd}
+    	 </if>
+    </delete>
+    
+    <select id="selectCommonCodePageNum" resultType="int">
+		select count(*) as
+		totalCount from S_GRP_CD
+	</select>
+	
+	<select id="selectCommonDtlCodePageNum" resultType="int">
+		select count(*) as totalCount 
+		from S_GRP_DTL_CD
+		where GRP_CD = #{grp_cd}
+	</select>
+    	
+</mapper>	

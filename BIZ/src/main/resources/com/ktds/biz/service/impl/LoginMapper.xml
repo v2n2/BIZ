@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.LoginMapper">
+
+	<select id="selectAccountById" resultType="login">
+		    SELECT 
+	        	*
+          FROM S_USER
+         WHERE emp_no = #{emp_no}
+ 
+	</select> 
+	
+	<select id="selectAccountList" resultType="login">
+		SELECT
+		    EMP_NO AS "emp_no", 
+			EMP_PASSWORD AS "emp_password"
+	
+		FROM 
+		    S_USER
+		<where>
+			<if test="adm_id != null and adm_id != '' ">
+				EMP_NO like '%' || #{emp_no} || '%'
+			</if>
+			
+			<if test="adm_pw != null and adm_pw != '' ">
+				AND type EMP_PASSWORD '%' || #{emp_password} || '%'
+			</if>
+		</where>
+
+    </select>
+    
+    <select id="selectAllMenu" resultType="menu">
+			with recursive cte as 
+			( 
+				select 	 menu_no
+						,menu_name
+						,par_menu_no
+						,1 AS level 
+						,menu_url
+				  from S_MENU
+				 where par_menu_no is null 
+				union all 
+				select 	p.menu_no
+						,p.menu_name
+						,p.par_menu_no
+						,1+level as level 
+						,p.menu_url
+				  from S_MENU p 
+				 inner join cte on p.par_menu_no = cte.menu_no
+			) 
+			select a.menu_no as menu_no
+				   ,ifnull( a.par_menu_no, 0) as par_menu_no
+				   ,a.menu_name as menu_name
+				   ,a.level
+				   ,a.menu_url
+				   ,case when a.par_menu_no = (select menu_no from cte where menu_no = a.par_menu_no) 
+				   			and a.menu_no = (select PAR_MENU_NO from cte where par_menu_no = a.menu_no LIMIT 1) then 'N' 
+			   			when a.par_menu_no = (select menu_no from cte where menu_no = a.par_menu_no)	
+				   			 then 'Y'
+				   		 else 'N' end as yn
+			  from cte a
+				order by a.menu_no;
+    </select>
+<!--      <select id="selectCheckPK" resultType="int">
+			SELECT count(*)
+		FROM  
+			t_ACCOUNT
+		WHERE
+			adm_id =  #{adm_id}
+    </select>
+    -->
+    <insert id="insertAccount">
+    	INSERT INTO S_USER (EMP_NO, EMP_PASSWORD, EMP_NAME, TEL_NO, BSE_DT, BSE_TM, BSE_EMP_NO, ALT_DT, ALT_TM, ALT_EMP_NO)
+      	VALUES (#{emp_no}, #{emp_password}, #{emp_name}, #{tel_no}, DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no})
+    </insert>
+	
+	<update id="updateAccount">
+	update S_USER set EMP_PASSWORD=#{emp_password}, EMP_NAME=#{emp_name}, TEL_NO=#{tel_no}, ALT_DT=DATE_FORMAT(now(), '%Y%m%d'), ALT_TM=DATE_FORMAT(now(), '%H%i%s') where EMP_NO=#{emp_no}
+	</update>
+
+    
+    <delete id="deleteAccount">
+    	DELETE FROM S_USER
+    	WHERE 
+    		emp_no =  #{emp_no}
+    </delete>
+    
+    <!--
+    <select id="selectAccountPage" resultType="account">
+		select *
+		from (
+		select <![CDATA[ rownum as rnum ]]>
+		, A.ADM_ID, A.ADM_PW, A.ADM_NAME, A.ADM_EMAIL, A.created, A.ADM_TYPE
+		from
+		(
+		select
+			ADM_ID, 
+			ADM_PW,
+			ADM_NAME,
+			ADM_EMAIL,
+			ADM_CDATE,
+			ADM_TYPE
+		from t_ACCOUNT
+		order by created desc
+		) A
+		where <![CDATA[ rownum <= #{page_end} ]]>
+		) B
+		where b.rnum >= #{page_st}
+	</select>
+
+	<select id="selectAccountPageNum" resultType="int">
+		select count(*) as
+		totalCount from t_ACCOUNT
+	</select> -->
+	
+	
+</mapper>	

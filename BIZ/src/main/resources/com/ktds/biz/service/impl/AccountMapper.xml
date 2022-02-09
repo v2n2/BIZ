@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.service.impl.AccountMapper">
+
+	<select id="selectAllAccountList" resultType="account">
+		SELECT 
+		    ADM_ID AS "adm_id", 
+			ADM_PW AS "adm_pw",
+			ADM_NAME AS "adm_name",
+			ADM_EMAIL AS "adm_email",
+			created as "adm_cdate",
+			ADM_TYPE as "adm_type"
+
+		FROM  
+			t_ACCOUNT
+ 
+	</select>
+	
+	<select id="selectAccountList" resultType="account">
+		SELECT
+		     ADM_ID AS "adm_id", 
+			ADM_PW AS "adm_pw"
+	
+		FROM 
+		    t_ACCOUNT
+		<where>
+			<if test="adm_id != null and adm_id != '' ">
+				adm_id like '%' || #{adm_id} || '%'
+			</if>
+			
+			<if test="adm_pw != null and adm_pw != '' ">
+				AND type adm_pw '%' || #{adm_pw} || '%'
+			</if>
+		</where>
+
+    </select>
+    
+    <select id="selectAccountDetail" resultType="account">
+			SELECT 
+		    ADM_ID AS "adm_id", 
+			ADM_PW AS "adm_pw",
+			ADM_NAME AS "adm_name",
+			ADM_EMAIL as "adm_email",
+			created as "adm_cdate",
+			ADM_TYPE as "adm_type"
+
+		FROM  
+			t_ACCOUNT
+		WHERE
+			adm_id =  #{adm_id}
+    </select>
+    <select id="selectCheckPK" resultType="int">
+			SELECT count(*)
+		FROM  
+			t_ACCOUNT
+		WHERE
+			adm_id =  #{adm_id}
+    </select>
+    
+    <insert id="insertAccount">
+    	INSERT INTO t_ACCOUNT (ADM_ID, ADM_PW, ADM_NAME, created, last_upd, ADM_EMAIL, ADM_ROLE, ADM_TYPE, ADM_LOGIN)
+      	VALUES (#{adm_id}, #{adm_pw}, #{adm_name}, now(), now(), #{adm_email},1,#{adm_type},0)
+    </insert>
+	
+	<update id="updateAccount">
+	update t_ACCOUNT set ADM_PW=#{adm_pw}, ADM_NAME=#{adm_name}, ADM_EMAIL=#{adm_email}, last_upd=now(), ADM_TYPE=#{adm_type} where ADM_ID=#{adm_id}
+	</update>
+
+    
+    <delete id="deleteAccount">
+    	DELETE FROM t_ACCOUNT 
+    	WHERE 
+    		adm_id =  #{adm_id}
+    </delete>
+    
+    
+    <select id="selectAccountPage" resultType="account">
+		select *
+		from (
+		select <![CDATA[ rownum as rnum ]]>
+		, A.ADM_ID, A.ADM_PW, A.ADM_NAME, A.ADM_EMAIL, A.created, A.ADM_TYPE
+		from
+		(
+		select
+			ADM_ID, 
+			ADM_PW,
+			ADM_NAME,
+			ADM_EMAIL,
+			ADM_CDATE,
+			ADM_TYPE
+		from t_ACCOUNT
+		order by created desc
+		) A
+		where <![CDATA[ rownum <= #{page_end} ]]>
+		) B
+		where b.rnum >= #{page_st}
+	</select>
+
+	<select id="selectAccountPageNum" resultType="int">
+		select count(*) as
+		totalCount from t_ACCOUNT
+	</select>
+	
+	
+</mapper>	

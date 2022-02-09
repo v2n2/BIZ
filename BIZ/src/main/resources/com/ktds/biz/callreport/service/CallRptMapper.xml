@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.callreport.service.CallRptMapper">
+
+	
+    <select id="selectRptCount" resultType="_int">
+	  SELECT count(1)
+		FROM  
+			S_CAL_RPT a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+		WHERE
+		     1=1
+		<!-- 등록일  -->
+		<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+		 	
+		 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+		 	
+		 	
+		</if>
+		<!-- 영업일 --> 
+		
+		 <if test='biz_sta_date != null and biz_sta_date != "" and biz_end_date != null and biz_end_date !=""'>
+		 	
+		 	AND a.BIZ_DT BETWEEN  #{biz_sta_date} AND #{biz_end_date}
+		 	
+		 </if>
+		<if test='rpt_name != null and rpt_name != ""'>
+		 	AND a.RPT_NAME = #{rpt_name}
+		 </if>
+		<if test='rpt_type != null and rpt_type != "all"'>
+		 	AND a.RPT_TYPE = #{rpt_type}
+		 </if>
+		 <if test='bse_emp_no != null and bse_emp_no !=""'>
+		 	AND a.BSE_EMP_NO = #{bse_emp_no}
+		 </if>
+    </select>
+    
+    <select id="selectRptList" resultType="com.ktds.biz.callreport.model.CallRpt_sub01">
+	  SELECT a.rpt_no  
+	  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+	  		,DATE_FORMAT(a.biz_dt,'%Y-%m-%d') as biz_dt
+	  		,a.rpt_type as rpt_type
+	  		,a.rpt_name as rpt_name
+	  		,b.dept_name as dept_name
+	  		,b.emp_name as emp_name
+	  		,c.grp_dtl_name as rpt_type_name
+	  		,d.epr_name as epr_name
+		FROM  
+			S_CAL_RPT a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+			left outer join S_GRP_DTL_CD c
+			on a.rpt_type = c.GRP_DTL_CD
+			and c.GRP_CD = 'CAL_RPT_TYPE'
+			left outer join S_EPR d
+			on a.epr_no = d.epr_no
+		WHERE
+		    1=1
+		<!-- 등록일  -->
+		<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+		 	
+		 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+		 	
+		 	
+		</if>
+		<!-- 영업일 --> 
+		
+		 <if test='biz_sta_date != null and biz_sta_date != "" and biz_end_date != null and biz_end_date !=""'>
+		 	
+		 	AND a.BIZ_DT BETWEEN  #{biz_sta_date} AND #{biz_end_date}
+		 	
+		 </if>
+		<if test='rpt_name != null and rpt_name != ""'>
+		 	AND a.RPT_NAME = #{rpt_name}
+		 </if>
+		<if test='rpt_type != null and rpt_type != "all"'>
+		 	AND a.RPT_TYPE = #{rpt_type}
+		 </if>
+		 <if test='bse_emp_no != null and bse_emp_no !=""'>
+		 	AND a.BSE_EMP_NO = #{bse_emp_no}
+		 </if>
+    </select>
+    
+    <select id="selectRptDetail" resultType="com.ktds.biz.callreport.model.CallRpt_sub01">
+	  SELECT a.rpt_no  
+	  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+	  		,DATE_FORMAT(a.biz_dt,'%Y-%m-%d') as biz_dt
+	  		,a.rpt_type as rpt_type
+	  		,a.rpt_name as rpt_name
+	  		,b.dept_name as dept_name
+	  		,b.emp_name as bse_emp_name
+	  		,a.BIZ_TYPE
+	  		,a.CONN_PER_TYPE
+	  		,a.BIZ_DT,INV_OBJ
+	  		,a.TOBE_DESC
+	  		,a.SUG_DESC
+	  		,a.CUS_DESC
+	  		,a.BIZ_ETC_DESC
+	  		,c.emp_name as emp_name
+	  		,a.emp_no as emp_no
+	  		,d.epr_name as epr_name
+	  		,a.epr_no as epr_no
+		FROM  
+			S_CAL_RPT a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+			left outer join S_USER c
+			on a.emp_no = c.emp_no
+			left outer join S_EPR d
+			on a.epr_no = d.epr_no
+		WHERE
+			a.rpt_no = #{rpt_no}
+    </select>
+
+    <insert id="insertRpt">
+    	INSERT INTO S_CAL_RPT (RPT_NAME, RPT_TYPE, EPR_NO, EMP_NO, MOC_NO, BIZ_TYPE,CONN_PER_TYPE,BIZ_DT,INV_OBJ,TOBE_DESC,SUG_DESC,CUS_DESC,BIZ_ETC_DESC, BSE_DT, BSE_TM, BSE_EMP_NO, ALT_DT, ALT_TM, ALT_EMP_NO)
+      	VALUES (#{rpt_name}, #{rpt_type}, #{epr_no},#{emp_no},#{moc_no}, #{biz_type}, #{conn_per_type},#{biz_dt},#{inv_obj},#{tobe_desc},#{sug_desc},#{cus_desc},#{biz_etc_desc},DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{bse_emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{bse_emp_no})
+    </insert>
+	
+	<update id="updateRptByNo">
+	update S_CAL_RPT 
+	   set RPT_NAME=#{rpt_name}, 
+		   RPT_TYPE=#{rpt_type}, 
+		   EPR_NO=#{epr_no}, 
+		   MOC_NO=#{moc_no}, 
+		   EMP_NO=#{emp_no}, 
+		   BIZ_TYPE=#{biz_type}, 
+		   CONN_PER_TYPE=#{conn_per_type},
+		   BIZ_DT=#{biz_dt},
+		   INV_OBJ=#{inv_obj},
+		   TOBE_DESC=#{tobe_desc},
+		   SUG_DESC=#{sug_desc},
+		   CUS_DESC=#{cus_desc},
+		   BIZ_ETC_DESC=#{biz_etc_desc},
+		   ALT_DT=DATE_FORMAT(now(), '%Y%m%d'), 
+		   ALT_TM=DATE_FORMAT(now(), '%H%i%s'), 
+		   ALT_EMP_NO=#{bse_emp_no}
+	 where RPT_NO=#{rpt_no}
+	</update>
+
+    
+    <delete id="deleteRptByNo">
+    	DELETE FROM S_CAL_RPT
+    	WHERE 
+    		RPT_NO =  #{rpt_no}
+    </delete>
+    
+    <!--
+    <select id="selectAccountPage" resultType="account">
+		select *
+		from (
+		select <![CDATA[ rownum as rnum ]]>
+		, A.ADM_ID, A.ADM_PW, A.ADM_NAME, A.ADM_EMAIL, A.created, A.ADM_TYPE
+		from
+		(
+		select
+			ADM_ID, 
+			ADM_PW,
+			ADM_NAME,
+			ADM_EMAIL,
+			ADM_CDATE,
+			ADM_TYPE
+		from t_ACCOUNT
+		order by created desc
+		) A
+		where <![CDATA[ rownum <= #{page_end} ]]>
+		) B
+		where b.rnum >= #{page_st}
+	</select>
+
+	<select id="selectAccountPageNum" resultType="int">
+		select count(*) as
+		totalCount from t_ACCOUNT
+	</select> -->
+	
+	
+</mapper>	

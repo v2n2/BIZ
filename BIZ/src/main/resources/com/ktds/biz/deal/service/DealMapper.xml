@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.deal.service.DealMapper">
+
+	
+    <select id="selectDealPageNum" resultType="_int">
+	  SELECT count(1)
+		FROM  
+			S_DEAL a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+		WHERE
+		     1=1
+		<!-- 등록일  -->
+		<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+		 	
+		 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+		</if>
+		<if test='deal_name != null and deal_name != ""'>
+		 	AND a.DEAL_NAME = #{deal_name}
+		 </if>
+		 <if test='deal_type != null and deal_type != "all"'>
+		 	AND a.DEAL_TYPE = #{deal_type}
+		 </if>
+		 <if test='biz_type != null and biz_type !="all"'>
+		 	AND a.BIZ_TYPE = #{biz_type}
+		 </if>
+    </select>
+    
+    <select id="SearchDealDtl" resultType="com.ktds.biz.deal.model.Deal_sub01">
+ 		 SELECT a.deal_no  as deal_no
+	  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+	  		,a.biz_type as biz_type
+	  		,e.grp_dtl_name as biz_type_name
+	  		,a.deal_type as deal_type
+	  		,d.grp_dtl_name as deal_type_name
+	  		,a.deal_name as deal_name
+	  		,a.proc_type as proc_type
+	  		,c.grp_dtl_name as proc_name
+	  		,b.dept_name as dept_name
+	  		,b.emp_name as emp_name
+	  		,DATE_FORMAT (a.con_dt,'%Y-%m-%d') as con_dt
+	  		,DATE_FORMAT (a.end_dt,'%Y-%m-%d') as end_dt
+	  		,a.deal_proc_per as deal_proc_per
+	  		,a.exp_pri
+	  		,a.exp_rev
+	  		,a.deal_souc
+	  		,f.epr_name
+	  		,a.epr_no
+		FROM  
+			S_DEAL a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+			left outer join S_GRP_DTL_CD c
+			on c.GRP_CD = 'PROC_TYPE'
+			and a.proc_type = c.grp_dtl_cd 
+			left outer join S_GRP_DTL_CD d
+			on d.GRP_CD = 'DEAL_TYPE'
+			and a.deal_type = d.grp_dtl_cd 
+			left outer join S_GRP_DTL_CD e
+			on e.GRP_CD = 'DEAL_BIZ_TYPE'
+			and a.biz_type = e.grp_dtl_cd
+			left outer join S_EPR f
+			on f.epr_no = a.epr_no 
+		WHERE
+			a.deal_no = #{deal_no}
+    </select>
+
+    <insert id="insertDeal">
+    	INSERT INTO S_DEAL (deal_type, deal_name, biz_type, proc_type, epr_no,con_dt, end_dt, deal_proc_per, exp_pri, exp_rev, deal_souc, emp_name, drop_yn, bse_dt, bse_tm, bse_emp_no, alt_dt, alt_tm, alt_emp_no)
+      	VALUES (#{deal_type}, #{deal_name}, #{biz_type},#{proc_type},#{epr_no},#{con_dt},#{end_dt},#{deal_proc_per},#{exp_pri},#{exp_rev},#{deal_souc},#{emp_name},#{drop_yn},DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{rgs_emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{rgs_emp_no})
+    </insert>
+    <update id="updateDealByNo">
+    	UPDATE S_DEAL
+    	   SET deal_name = #{deal_name}
+      		   ,deal_type = #{deal_type}
+      		   ,biz_type= #{biz_type}
+      		   ,proc_type = #{proc_type}
+      		   ,con_dt = #{con_dt}
+      		   ,end_dt = #{end_dt}
+      		   ,deal_proc_per = #{deal_proc_per}
+      		   ,exp_pri = #{exp_pri}
+      		   ,exp_rev = #{exp_rev}
+      		   ,deal_souc = #{deal_souc}
+      		   ,emp_name = #{emp_name}
+      		   ,drop_yn = #{drop_yn}
+      		   ,epr_no = #{epr_no}
+      		   ,alt_dt = DATE_FORMAT(now(), '%Y%m%d')
+      		   ,alt_tm = DATE_FORMAT(now(), '%H%i%s')
+      		   ,alt_emp_no = #{rgs_emp_no}
+    	 WHERE deal_no = #{deal_no}  
+    </update>
+    <delete id="deleteDealByNo">
+    	DELETE FROM S_DEAL
+    	WHERE 
+    		DEAL_NO =  #{deal_no}
+    </delete>
+    
+    <select id="selectDealPage" resultType="com.ktds.biz.deal.model.Deal_sub01">
+		select *
+		from (
+			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
+			,aa.deal_no  as deal_no
+	  		,aa.bse_dt as bse_dt
+	  		,aa.biz_type as biz_type
+	  		,aa.biz_type_name as biz_type_name
+	  		,aa.deal_type as deal_type
+	  		,aa.deal_name as deal_name
+	  		,aa.proc_type as proc_type
+	  		,aa.proc_name as proc_name
+	  		,aa.dept_name as dept_name
+	  		,aa.emp_name as emp_name
+	  		,aa.deal_type_name as deal_type_name
+	  		,aa.epr_no as epr_no
+			,aa.epr_name as epr_name
+			from
+			(
+				 SELECT a.deal_no  as deal_no
+			  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+			  		,a.biz_type as biz_type
+			  		,e.grp_dtl_name as biz_type_name
+			  		,a.deal_type as deal_type
+			  		,d.grp_dtl_name as deal_type_name
+			  		,a.deal_name as deal_name
+			  		,a.proc_type as proc_type
+			  		,c.grp_dtl_name as proc_name
+			  		,b.dept_name as dept_name
+			  		,b.emp_name as emp_name
+			  		,a.epr_no as epr_no
+			  		,f.epr_name as epr_name
+				FROM  
+					S_DEAL a
+					left outer join S_USER b
+					on a.bse_emp_no = b.emp_no
+					left outer join S_GRP_DTL_CD c
+					on c.GRP_CD = 'PROC_TYPE'
+					and a.proc_type = c.grp_dtl_cd 
+					left outer join S_GRP_DTL_CD d
+					on d.GRP_CD = 'DEAL_TYPE'
+					and a.deal_type = d.grp_dtl_cd 
+					left outer join S_GRP_DTL_CD e
+					on e.GRP_CD = 'DEAL_BIZ_TYPE'
+					and a.biz_type = e.grp_dtl_cd 
+					left outer join S_EPR f
+					on f.epr_no = a.epr_no
+				WHERE
+				    1=1
+				<!-- 등록일  -->
+				<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+				 	
+				 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+				</if>
+				<if test='deal_name != null and deal_name != ""'>
+				 	AND a.DEAL_NAME = #{deal_name}
+				 </if>
+				 <if test='deal_type != null and deal_type != "all"'>
+				 	AND a.DEAL_TYPE = #{deal_type}
+				 </if>
+				 <if test='biz_type != null and biz_type !="all"'>
+				 	AND a.BIZ_TYPE = #{biz_type}
+				 </if>
+			) aa
+			LIMIT #{page_end}
+		) dd
+		where dd.rnum >= #{page_st}
+		order by dd.BSE_DT desc
+	</select>
+	<select id="selectLgrPageNum" resultType="_int">
+	  SELECT count(1)
+		FROM  
+			S_DEAL_LGR a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+			left outer join S_DEAL c
+			on a.deal_no = c.deal_no
+		WHERE
+		     1=1
+		<!-- 등록일  -->
+		<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+		 	
+		 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+		</if>
+		<if test='deal_lgr_name != null and deal_lgr_name != ""'>
+		 	AND a.DEAL_LGR_NAME = #{deal_lgr_name}
+		 </if>
+		 <if test='deal_no != null and deal_no != "all"'>
+		 	AND a.DEAL_NO = #{deal_no}
+		 </if>
+		 <if test='biz_type != null and biz_type !="all"'>
+		 	AND a.BIZ_TYPE = #{biz_type}
+		 </if>
+    </select>
+    
+    <select id="SearchLgrDtl" resultType="com.ktds.biz.deal.model.Deal_Lgr_sub01">
+ 		 SELECT a.deal_lgr_no  as deal_lgr_no
+	  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+	  		,a.biz_type as biz_type
+	  		,e.grp_dtl_name as biz_type_name
+	  		,a.deal_type as deal_type
+	  		,d.grp_dtl_name as deal_type_name
+	  		,a.deal_name as deal_name
+	  		,a.proc_type as proc_type
+	  		,c.grp_dtl_name as proc_name
+	  		,b.dept_name as dept_name
+	  		,b.emp_name as emp_name
+	  		,DATE_FORMAT (a.con_dt,'%Y-%m-%d') as con_dt
+	  		,DATE_FORMAT (a.end_dt,'%Y-%m-%d') as end_dt
+	  		,a.deal_proc_per as deal_proc_per
+	  		,a.exp_pri
+	  		,a.exp_rev
+	  		,a.deal_souc
+	  		,f.epr_name
+	  		,a.epr_no
+		FROM  
+			S_DEAL a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+			left outer join S_GRP_DTL_CD c
+			on c.GRP_CD = 'PROC_TYPE'
+			and a.proc_type = c.grp_dtl_cd 
+			left outer join S_GRP_DTL_CD d
+			on d.GRP_CD = 'DEAL_TYPE'
+			and a.deal_type = d.grp_dtl_cd 
+			left outer join S_GRP_DTL_CD e
+			on e.GRP_CD = 'DEAL_BIZ_TYPE'
+			and a.biz_type = e.grp_dtl_cd
+			left outer join S_EPR f
+			on f.epr_no = a.epr_no 
+		WHERE
+			a.deal_no = #{deal_no}
+    </select>
+
+    <insert id="insertLgr">
+    	INSERT INTO S_DEAL_LGR (deal_lgr_name, deal_no, rm_emp_no, epr_no, dbt_type, sub_type,grt_yn, cur_cd, tot_isu_amn, isu_num, isu_date, lead_mgr, pcp_type, contract_date, ,due_date, due_year
+    							,isu_yld, surf_intr_rate, int_pay_mod, coun_amt, sal_pri, conv_pri, war_pri, war_pri_sta_date, war_pri_end_date, cre_rat, desc_text, bse_dt, bse_tm, bse_emp_no, alt_dt, alt_tm, alt_emp_no)
+      	VALUES (#{deal_lgr_name}, #{deal_no}, #{rm_emp_no},#{epr_no},#{dbt_type},#{sub_type},#{cur_cd},#{tot_isu_amn},#{isu_num},#{isu_date},#{lead_mgr},#{pcp_type},#{contract_date},#{due_date},#{due_year},
+      			#{isu_yld},#{surf_intr_rate},#{int_pay_mod},#{coun_amt},#{sal_pri},#{conv_pri},#{war_pri},#{war_pri_sta_date},#{war_pri_end_date},#{cre_rat},#{desc_text},DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{rgs_emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{rgs_emp_no})
+    </insert>
+    <update id="updateLgrByNo">
+    	UPDATE S_DEAL
+    	   SET deal_lgr_name = #{deal_lgr_name}
+      		   deal_no = #{deal_no}
+      		   ,rm_emp_no= #{rm_emp_no}
+      		   ,epr_no = #{epr_no}
+      		   ,dbt_type = #{dbt_type}
+      		   ,sub_type = #{sub_type}
+      		   ,grt_yn = #{grt_yn}
+      		   ,cur_cd = #{cur_cd}
+      		   ,tot_isu_amn = #{tot_isu_amn}
+      		   ,isu_num = #{isu_num}
+      		   ,isu_date = #{isu_date}
+      		   ,lead_mgr = #{lead_mgr}
+      		   ,pcp_type = #{pcp_type}
+      		   ,contract_date= #{contract_date}
+      		   ,due_date = #{due_date}
+      		   ,due_year = #{due_year}
+      		   ,isu_yld = #{isu_yld}
+      		   ,surf_intr_rate = #{surf_intr_rate}
+      		   ,int_pay_mod = #{int_pay_mod}
+      		   ,coun_amt = #{coun_amt}
+      		   ,sal_pri = #{sal_pri}
+      		   ,conv_pri = #{conv_pri}
+      		   ,war_pri = #{war_pri}
+      		   ,war_pri_sta_date = #{war_pri_sta_date}
+      		   ,war_pri_end_date = #{war_pri_end_date}
+      		   ,cre_rat = #{cre_rat}
+      		   ,desc_text = #{desc_text}
+      		   ,alt_dt = DATE_FORMAT(now(), ',%Y%m%d')
+      		   ,alt_tm = DATE_FORMAT(now(), '%H%i%s')
+      		   ,alt_emp_no = #{rgs_emp_no}
+    	 WHERE deal_lgr_no = #{deal_lgr_no}  
+    </update>
+    <delete id="deleteLgrByNo">
+    	DELETE FROM S_DEAL_LGR
+    	WHERE 
+    		deal_lgr_no =  #{deal_lgr_no}
+    </delete>
+    
+    <select id="selectLgrPage" resultType="com.ktds.biz.deal.model.Deal_Lgr_sub01">
+		select *
+		from (
+			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
+			,aa.deal_no  as deal_no
+	  		,aa.bse_dt as bse_dt
+	  		,aa.biz_type as biz_type
+	  		,aa.biz_type_name as biz_type_name
+	  		,aa.deal_type as deal_type
+	  		,aa.deal_name as deal_name
+	  		,aa.proc_type as proc_type
+	  		,aa.proc_name as proc_name
+	  		,aa.dept_name as dept_name
+	  		,aa.emp_name as emp_name
+	  		,aa.deal_type_name as deal_type_name
+	  		,aa.epr_no as epr_no
+			,aa.epr_name as epr_name
+			from
+			(
+				 SELECT a.deal_no  as deal_no
+			  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+			  		,a.biz_type as biz_type
+			  		,e.grp_dtl_name as biz_type_name
+			  		,a.deal_type as deal_type
+			  		,d.grp_dtl_name as deal_type_name
+			  		,a.deal_name as deal_name
+			  		,a.proc_type as proc_type
+			  		,c.grp_dtl_name as proc_name
+			  		,b.dept_name as dept_name
+			  		,b.emp_name as emp_name
+			  		,a.epr_no as epr_no
+			  		,f.epr_name as epr_name
+				FROM  
+					S_DEAL a
+					left outer join S_USER b
+					on a.bse_emp_no = b.emp_no
+					left outer join S_GRP_DTL_CD c
+					on c.GRP_CD = 'PROC_TYPE'
+					and a.proc_type = c.grp_dtl_cd 
+					left outer join S_GRP_DTL_CD d
+					on d.GRP_CD = 'DEAL_TYPE'
+					and a.deal_type = d.grp_dtl_cd 
+					left outer join S_GRP_DTL_CD e
+					on e.GRP_CD = 'DEAL_BIZ_TYPE'
+					and a.biz_type = e.grp_dtl_cd 
+					left outer join S_EPR f
+					on f.epr_no = a.epr_no
+				WHERE
+				    1=1
+				<!-- 등록일  -->
+				<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+				 	
+				 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+				</if>
+				<if test='deal_name != null and deal_name != ""'>
+				 	AND a.DEAL_NAME = #{deal_name}
+				 </if>
+				 <if test='deal_type != null and deal_type != "all"'>
+				 	AND a.DEAL_TYPE = #{deal_type}
+				 </if>
+				 <if test='biz_type != null and biz_type !="all"'>
+				 	AND a.BIZ_TYPE = #{biz_type}
+				 </if>
+			) aa
+			LIMIT #{page_end}
+		) dd
+		where dd.rnum >= #{page_st}
+		order by dd.BSE_DT desc
+	</select>
+</mapper>	

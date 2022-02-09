@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ktds.biz.service.impl.StatisticsMapper">
+	<resultMap type="com.ktds.biz.model.AIStatistics" id="aiStatisticMap">
+		<result column="CAM_ID" property="camId"/>
+		<result column="CAM_NAME" property="camName"/>
+		<result column="CAM_TYPE" property="camType"/>
+		<result column="CAM_STATUS" property="camStatus"/>
+		<result column="ADM_ID" property="adm_id"/>
+		<result column="ADM_NAME" property="admName"/>
+		<result column="ADM_TYPE" property="admType"/>
+		<result column="CAM_CDATE" property="camCdate"/>
+		<result column="TRAIN_METHOD" property="trainMethod"/>
+		<result column="TEST_CNT" property="testCnt"/>
+		<result column="ORIGINAL_ACC" property="originalAcc"/>
+		<result column="SO_ACC" property="soAcc"/>
+		<result column="AI_ACC" property="aiAcc"/>
+		<result column="REAL_ACC" property="realAcc"/>
+		<result column="MODEL_FLAG" property="modelFlag"/>
+		
+		<result column="ORIGINAL_ACC_AVG" property="originalAccAvg"/>
+		<result column="SO_ACC_AVG" property="soAccAvg"/>
+		<result column="REAL_ACC_AVG" property="realAccAvg"/>
+		<result column="AI_ACC_AVG" property="aiAccAvg"/>
+	</resultMap>
+	
+	<sql id="inputParam">
+		<!-- 캠페인명 존재 시 -->
+		<if test="camName != null">
+			AND ts.src_NAME LIKE '%' || #{camName} || '%'
+		</if>
+		<!-- 캠페인 목적 존재 시 -->
+		<if test='(camType != null) and !(camType eq "".toString())'>
+			AND ts.src_TYPE = #{camType}
+		</if>
+		<!-- 캠페인 상태 존재 시 -->
+		<if test='(camStatus != null) and !(camStatus eq "".toString())'>
+			AND ts.STATUS_cd = #{camStatus}
+		</if>
+		<!-- 생성자 존재 시 -->
+		<if test='(admId != null) and !(admId eq "".toString())'>
+			AND ts.ADM_ID = #{admId}
+		</if>
+		<!-- 기간 존재 시 -->
+		<if test='(beforeDate != null) and !(beforeDate eq "".toString()) and (afterDate != null) and !(afterDate eq "".toString())'>
+			AND ts.created BETWEEN cast(#{beforeDate} as timestamp) AND cast(#{afterDate} as timestamp)
+		</if>
+	</sql>
+	
+	<sql id="realAccParam">
+		<if test="realAccFlag eq true">
+			<!-- AND <![CDATA[ ttm.REAL_ACC <> 0 ]]> -->
+		</if>
+	</sql>
+	
+	<!-- 캠페인 조회 -->
+	<select id="selectCamList" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT ts.src_id,
+			   ts.src_name,
+			   ts.src_type,
+			   ts.status_cd,
+			   ts.adm_id,
+			   ts.created,
+			   COALESCE(ROUND(cast (ts.ORIGINAL_ACC as numeric), 2), 0) as ORIGINAL_ACC
+			   <!-- ,ttm.REAL_ACC -->
+		FROM t_src as ts
+		<!-- 파라메터 조건 -->
+		WHERE 1= 1
+		  	
+		<!-- <include refid="realAccParam"></include> -->
+		<include refid="inputParam"></include>
+		
+		ORDER BY ts.created DESC
+		LIMIT 6
+	</select>
+	
+	<!-- 선택된 모델 여부(MODEL_FLAG가 Y인 목록) -->
+	<select id="selectSttModelYList" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT ts.src_id,
+			   ts.src_name,
+			   ts.src_type,
+			   ts.status_cd,
+			   ts.adm_id,
+			   ts.created,
+			   ttm.train_method,
+			   COALESCE(ROUND(cast (ts.ORIGINAL_ACC as numeric), 2), 0) as ORIGINAL_ACC,
+			   COALESCE(ROUND(cast (ttm.AI_ACC as numeric), 2), 0) as AI_ACC, 
+			   COALESCE(ROUND(cast (ttm.SO_ACC as numeric), 2), 0) as SO_ACC,
+			   COALESCE(ROUND(cast (ts.REAL_ACC as numeric), 2), 0) as REAL_ACC  
+			   <!-- ,ttm.REAL_ACC -->
+		FROM t_src as ts,
+		     t_train_model as ttm
+		<!-- 파라메터 조건 -->
+		WHERE ts.src_id = ttm.src_id
+		  and ttm.MODEL_FLG = 'Y'  
+		
+		<!-- <include refid="realAccParam"></include> -->
+		<include refid="inputParam"></include>
+		
+		ORDER BY ts.created DESC
+		LIMIT 6
+	</select>
+	
+	<!-- 의사결정나무평균 쿼리 -->
+	<select id="selectDTreeAvg" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT COALESCE(ROUND(AVG(cast (ts.ORIGINAL_ACC as numeric)), 2), 0) as ORIGINAL_ACC_AVG, 
+			   COALESCE(ROUND(cast (AVG(ttm.AI_ACC) as numeric), 2), 0) as AI_ACC_AVG,
+			   COALESCE(ROUND(cast (AVG(ttm.SO_ACC) as numeric), 2), 0) as SO_ACC_AVG,  
+			   COALESCE(ROUND(AVG(cast (ts.REAL_ACC as numeric)), 2), 0) as REAL_ACC_AVG
+		FROM t_src as ts,
+		     t_train_model as ttm
+		
+		<!-- 파라메터 조건 -->
+		WHERE ts.src_id = ttm.src_id
+		  and ttm.TRAIN_METHOD = 'DecisionTree' 
+		
+		<include refid="realAccParam"></include>
+		<include refid="inputParam"></include>
+	</select>
+	
+	<!-- 랜덤포레스트 평균 쿼리 -->
+	<select id="selectRFavg" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT COALESCE(ROUND(AVG(cast (ts.ORIGINAL_ACC as numeric)), 2), 0) as ORIGINAL_ACC_AVG, 
+			   COALESCE(ROUND(cast (AVG(ttm.AI_ACC) as numeric), 2), 0) as AI_ACC_AVG,
+			   COALESCE(ROUND(cast (AVG(ttm.SO_ACC) as numeric), 2), 0) as SO_ACC_AVG,  
+			   COALESCE(ROUND(AVG(cast (ts.REAL_ACC as numeric)), 2), 0) as REAL_ACC_AVG
+			   <!-- ,NVL(ROUND(AVG(REAL_ACC), 2), 0) as REAL_ACC_AVG -->
+		FROM t_src as ts,
+		     t_train_model as ttm
+		<!-- 파라메터 조건 -->
+		WHERE ttm.TRAIN_METHOD = 'RandomForest' 
+		
+		<include refid="realAccParam"></include>
+		<include refid="inputParam"></include>
+	</select>
+	
+	<!-- SVM 평균 쿼리 -->
+	<select id="selectSVMavg" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT COALESCE(ROUND(AVG(cast (ts.ORIGINAL_ACC as numeric)), 2), 0) as ORIGINAL_ACC_AVG, 
+			   COALESCE(ROUND(cast (AVG(ttm.AI_ACC) as numeric), 2), 0) as AI_ACC_AVG,
+			   COALESCE(ROUND(cast (AVG(ttm.SO_ACC) as numeric), 2), 0) as SO_ACC_AVG,  
+			   COALESCE(ROUND(AVG(cast (ts.REAL_ACC as numeric)), 2), 0) as REAL_ACC_AVG 
+			   <!-- ,NVL(ROUND(AVG(REAL_ACC), 2), 0) as REAL_ACC_AVG -->
+		FROM t_src as ts,
+		     t_train_model as ttm
+		<!-- 파라메터 조건 -->
+		WHERE ttm.TRAIN_METHOD = 'svm' 
+		
+		<include refid="realAccParam"></include>
+		<include refid="inputParam"></include>
+	</select>
+	<!-- SVM 평균 쿼리 -->
+	<select id="selectDNNavg" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT COALESCE(ROUND(AVG(cast (ts.ORIGINAL_ACC as numeric)), 2), 0) as ORIGINAL_ACC_AVG, 
+			   COALESCE(ROUND(cast (AVG(ttm.AI_ACC) as numeric), 2), 0) as AI_ACC_AVG,
+			   COALESCE(ROUND(cast (AVG(ttm.SO_ACC) as numeric), 2), 0) as SO_ACC_AVG,  
+			   COALESCE(ROUND(AVG(cast (ts.REAL_ACC as numeric)), 2), 0) as REAL_ACC_AVG
+			   <!-- ,NVL(ROUND(AVG(REAL_ACC), 2), 0) as REAL_ACC_AVG -->
+		FROM t_src as ts,
+		     t_train_model as ttm
+		<!-- 파라메터 조건 -->
+		WHERE ttm.TRAIN_METHOD = 'Deep Neural Network' 
+		
+		<include refid="realAccParam"></include>
+		<include refid="inputParam"></include>
+	</select>
+	
+	
+	<!-- 선형회기 평균 쿼리 -->
+	<select id="selectLRavg" resultMap="aiStatisticMap" parameterType="com.ktds.biz.model.AIStatistics">
+		SELECT COALESCE(ROUND(AVG(cast (ts.ORIGINAL_ACC as numeric)), 2), 0) as ORIGINAL_ACC_AVG, 
+			   COALESCE(ROUND(cast (AVG(ttm.AI_ACC) as numeric), 2), 0) as AI_ACC_AVG,
+			   COALESCE(ROUND(cast (AVG(ttm.SO_ACC) as numeric), 2), 0) as SO_ACC_AVG,  
+			   COALESCE(ROUND(AVG(cast (ts.REAL_ACC as numeric)), 2), 0) as REAL_ACC_AVG  
+			   <!-- ,NVL(ROUND(AVG(REAL_ACC), 2), 0) as REAL_ACC_AVG -->
+		FROM t_src as ts,
+		     t_train_model as ttm
+		
+		<!-- 파라메터 조건 -->
+		WHERE ttm.TRAIN_METHOD = 'LogisticRegression' 
+		
+		<include refid="realAccParam"></include>
+		<include refid="inputParam"></include>
+	</select>
+</mapper>
