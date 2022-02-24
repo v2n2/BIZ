@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.admin.service.DashboardMapper">
+
+    <insert id="insertDashboard">
+    	INSERT INTO S_DASHBOARD 
+      	VALUES (#{dsb_no}, #{dsb_name}, #{dsb_x}, #{dsb_y}, DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{emp_no})
+      	ON DUPLICATE KEY 
+      	UPDATE DSB_NAME = #{dsb_name}
+      		   ,DSB_X = #{dsb_x}
+      		   ,DSB_Y= #{dsb_y}
+      		   ,ALT_DT = DATE_FORMAT(now(), '%Y%m%d')
+      		   ,ALT_TM = DATE_FORMAT(now(), '%H%i%s')
+      		   ,ALT_EMP_NO = #{emp_no};
+    </insert>
+	
+    <delete id="deleteDashboardByNo">
+    	DELETE FROM S_DASHBOARD
+    	WHERE 
+    		DSB_NO =  #{dsb_no}
+    </delete>
+    
+
+    <select id="selectDashboardPage" resultType="com.ktds.biz.admin.model.Dashboard">
+		select *
+		from (
+			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
+			, A.DSB_NO
+			, A.DSB_NAME
+			, A.DSB_X
+			, A.DSB_Y
+			, A.BSE_DT
+			from
+			(
+				select
+					DSB_NO, 
+					DSB_NAME,
+					DSB_X,
+					DSB_Y,
+					BSE_DT
+				from S_DASHBOARD
+				order by BSE_DT desc
+			) A
+			LIMIT #{page_end}
+		) B
+		where B.rnum >= #{page_st}
+	</select>
+
+	<select id="selectDashboardPageNum" resultType="int">
+		select count(*) as		totalCount 
+		from S_DASHBOARD
+	</select>
+	
+	
+</mapper>	

@@ -30,7 +30,7 @@
 		<div class="content-wrapper">
 			<!-- Main content -->
 			<!--<section class="content">-->
-				<iframe  id="main_frame" src="/admin/MenuAdmin" width="100%" height="89%"></iframe>
+				<iframe  id="main_frame" src="/include/Dashboard" width="100%" height="89%"></iframe>
 			<!--</section>-->
 			<!-- /.Main content -->
 			<!-- /.content -->

@@ -63,7 +63,7 @@ function searchMenu(arr){
 			var par_menu_no = arrVal.par_menu_no;
 			var level = arrVal.level;
 			
-			var li = '<li id="'+ menu_no +'" lvl="' + level + '"><a href="" onclick="setMenuData('+arrIdx+')">'+ menu_name +'</a></li>';
+			var li = '<li id="'+ menu_no +'" lvl="' + level + '"><span style="color:#3c8dbc; cursor:pointer;" onclick="setMenuData('+arrIdx+')">'+ menu_name +'</span></li>';
 			//'<li id="20" lvl="2"><a>메인</a></li>'
 			//1레벨은 그냥 추가 처리
 			if(level  == '1'){
@@ -117,7 +117,7 @@ function transactionGet(url, data, callback){
  * @param str       : 체크할 문자열
  */
 function isEmpty(str){
-    if(typeof str == "undefined" || str == "null" || str == "" || str == "undifined")
+    if(typeof str == "undefined" || str == "null" || str == "" || str == "undefined" || str === "undefined")
         return true;
     else
         return false ;

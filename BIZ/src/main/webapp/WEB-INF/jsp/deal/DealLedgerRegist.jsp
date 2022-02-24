@@ -137,9 +137,9 @@
 									        <td>
 									        	<select id="dbt_type"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">선택</option>
-															<option value="PS">선보증</option>
-															<option value="FS">무보증</option>
+															<option selected="selected" value="al">선택</option>
+															<option value="FG">선보증</option>
+															<option value="NG">무보증</option>
 														</select>
 											</td>
 									    </tr>
@@ -150,9 +150,9 @@
 									        <td>
 												<select id="sub_type"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">선택</option>
-															<option value="US">공모</option>
-															<option value="RS">사모</option>
+															<option selected="selected" value="al">선택</option>
+															<option value="PU">공모</option>
+															<option value="PR">사모</option>
 														</select>
 												
 									        </td>
@@ -162,9 +162,9 @@
 									        <td>
 												<select id="grt_yn"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">전체</option>
-															<option value="HS">유</option>
-															<option value="FN">무</option>
+															<option selected="selected" value="al">전체</option>
+															<option value="Y">유</option>
+															<option value="N">무</option>
 														</select>
 											</td>
 									    </tr>
@@ -182,7 +182,7 @@
 									        <td>
 									        	<select id="cur_cd"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">선택</option>
+															<option selected="selected" value="al">선택</option>
 															<option value="US">USD</option>
 															<option value="EU">EUR</option>
 															<option value="KR">KRW</option>
@@ -216,10 +216,10 @@
 									        <td>
 									        	<select id="lead_mgr"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">선택</option>
-															<option value="HS">미래에셋</option>
-															<option value="FN">NH투자증권</option>
-															<option value="FN">DB금융투자</option>
+															<option selected="selected" value="al">선택</option>
+															<option value="MR">미래에셋</option>
+															<option value="NH">NH투자증권</option>
+															<option value="DB">DB금융투자</option>
 														</select>
 											</td>
 											 <th scope="row">
@@ -228,9 +228,9 @@
 									        <td>
 									        	<select id="pcp_type"
 															class="form-control select2" style="width: 100%;">
-															<option selected="selected" value="all">선택</option>
-															<option value="HS">참여</option>
-															<option value="FN">미참여</option>
+															<option selected="selected" value="al">선택</option>
+															<option value="Y">참여</option>
+															<option value="N">미참여</option>
 														</select>
 											</td>
 									    </tr>
@@ -926,19 +926,17 @@
 			// 모달 처리
 			$('.modal').on('hidden.bs.modal', function(e) {
 				// console.log('modal close');
-				$(this).find('form')[0].reset();
 			});
 			$('.modal').on('shown.bs.modal', function() {
 				// console.log('modal open');
 			});
 			var deal_lgr_no = document.getElementById("deal_lgr_no").value;
-			debugger;
 			if(!isEmpty(deal_lgr_no)){
 				var obj = {};
 				obj.deal_lgr_no = $("input[id='deal_lgr_no']")[0].value;
-				url = "/deal/searchlgrDetail";
+				url = "/deal/SearchLgrDtl";
 				
-				transactionGet(url,obj,function(obj){
+				transactionGet(url,obj,function(o){
 					$("input[id='deal_lgr_name']")[0].value= o.deal_lgr_name ;
 					$("input[id='deal_lgr_no']")[0].value= o.deal_lgr_no ;
 					$("input[id='deal_name']")[0].value= o.deal_name ;
@@ -947,15 +945,48 @@
 					$("input[id='rm_emp_name']")[0].value= o.rm_emp_name ;
 					$("input[id='epr_name']")[0].value= o.epr_name ;
 					$("input[id='epr_no']")[0].value= o.epr_no ;
-					$("#dbt_type option:eq("+o.dbt_type+")").attr("selected","selected");
-					$("#sub_type option:eq("+o.sub_type+")").attr("selected","selected");
-					$("#grt_yn option:eq("+o.grt_yn+")").attr("selected","selected");
-					$("#cur_cd option:eq("+o.cur_cd+")").attr("selected","selected");
+					//debugger;
+					var select_type = $('#dbt_type').children();
+					$.each(select_type,function(ii,dd){
+						if(dd.value == o.dbt_type){
+							dd.setAttribute("selected","selected");
+						}
+					});
+					var sub_type = $('#sub_type').children();
+					$.each(sub_type,function(ii,dd){
+						if(dd.value == o.sub_type){
+							dd.setAttribute("selected","selected");
+						}
+					});
+					var grt_yn = $('#grt_yn').children();
+					$.each(grt_yn,function(ii,dd){
+						if(dd.value == o.grt_yn){
+							dd.setAttribute("selected","selected");
+						}
+					});
+					var cur_cd = $('#cur_cd').children();
+					$.each(cur_cd,function(ii,dd){
+						if(dd.value == o.cur_cd){
+							dd.setAttribute("selected","selected");
+						}
+					});
 					$("input[id='tot_isu_amn']")[0].value= o.tot_isu_amn ;
 					$("input[id='isu_num']")[0].value= o.isu_num ;
-					$("input[id='isu_date']")[0].value= o.isu_date ;
-					$("#lead_mgr option:eq("+o.lead_mgr+")").attr("selected","selected");
-					$("#pcp_type option:eq("+o.pcp_type+")").attr("selected","selected");
+					$("input[id='isu_date']")[0].value= o.isu_date 
+					var lead_mgr = $('#lead_mgr').children();
+					$.each(lead_mgr,function(ii,dd){
+						if(dd.value == o.lead_mgr){
+							dd.setAttribute("selected","selected");
+						}
+					});
+					var pcp_type = $('#pcp_type').children();
+					$.each(pcp_type,function(ii,dd){
+						if(dd.value == o.pcp_type){
+							dd.setAttribute("selected","selected");
+						}
+					});
+					//$("#lead_mgr option:eq("+o.lead_mgr+")").attr("selected","selected");
+					//$("#pcp_type option:eq("+o.pcp_type+")").attr("selected","selected");
 					$("input[id='contract_date']")[0].value= o.contract_date ;
 					$("input[id='due_date']")[0].value= o.due_date ;
 					$("input[id='due_year']")[0].value= o.due_year ;
@@ -979,7 +1010,7 @@
 			var url = "/deal/UpdateLgr";
 
 			o.deal_lgr_name =$("input[id='deal_lgr_name']")[0].value;
-			o.deal_lgr_no = $("input[id='deal_lgr_no']")[0].value= o.deal_lgr_no ;
+			o.deal_no = $('#deal_no')[0].value ;
 			o.rm_emp_no = $("input[id='rm_emp_no']")[0].value  ;
 			o.rm_emp_name = $("input[id='rm_emp_name']")[0].value  ;
 			o.epr_name =$("input[id='epr_name']")[0].value ;
@@ -993,7 +1024,7 @@
 			o.isu_date =$("input[id='isu_date']")[0].value.replaceAll("-","") ;
 			o.lead_mgr = $("#lead_mgr  option:selected").val();
 			o.pcp_type = $("#pcp_type  option:selected").val();
-			o.contract_date = $("input[id='contract_date']")[0].value;
+			o.contract_date = $("input[id='contract_date']")[0].value.replaceAll("-","");
 			o.due_date = $("input[id='due_date']")[0].value.replaceAll("-","") ;
 			o.due_year= $("input[id='due_year']")[0].value ;
 			o.isu_yld=$("input[id='isu_yld']")[0].value ;
@@ -1007,8 +1038,9 @@
 			o.war_pri_end_date = $("input[id='war_pri_end_date']")[0].value.replaceAll("-","");
 			o.cre_rat = $("input[id='cre_rat']")[0].value;
 			o.desc_text = $("textarea[id='desc_text']")[0].value ;
-			debugger;
-			if(isEmpty($("input[id='deal_lgr_no']")[0].value)){
+			o.rgs_emp_no = $("input[id='rgs_emp_id']")[0].value;
+			var test = $("input[id='deal_lgr_no']")[0].value
+			if(isEmpty(test)){
 				url = "/deal/InsertLgr";
 			}else{
 				o.deal_no = $("input[id='deal_lgr_no']")[0].value;

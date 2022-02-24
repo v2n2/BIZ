@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ktds.biz.deal.service.DealDashboardMapper">
+
+	<select id="searchDealDashboard" resultType="com.ktds.biz.deal.model.DealDashboard_sub01">
+	  SELECT grp_dtl_cd
+	         ,grp_dtl_name 
+	         ,cnt
+	         ,value
+		FROM  
+			( 
+			  SELECT grp_dtl_cd
+			         ,grp_dtl_name 
+				FROM S_GRP_DTL_CD sgdc
+			   WHERE GRP_CD = #{grp_cd}
+			ORDER BY bse_dt, bse_tm 
+			) a
+LEFT OUTER JOIN (
+			  SELECT proc_type
+			         ,count(*) as cnt 
+			         ,sum(exp_pri) as value  
+			    FROM S_DEAL sd 
+			   WHERE biz_type = #{biz_type} 
+			GROUP BY proc_type
+			     ) b
+			ON a.grp_dtl_cd = b.proc_type 
+      GROUP BY grp_dtl_cd 
+    </select>	
+</mapper>	

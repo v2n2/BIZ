@@ -650,19 +650,19 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			// 게시판 조회
-			getPagination();
+			//getPagination();
 			var leftTab = document.getElementById("leftTab");
 			if (leftTab != null) {
 				initLeftChart();
-				loadLeftStat();
+				//loadLeftStat();
 			}
 			initRightChart();
-			loadRightStat();
+			//loadRightStat();
 
 			if (leftTab != null) {
 				loadLeftTab();
 			}
-			loadRightTab();
+			//loadRightTab();
 			
 			$('.dropdown-toggle').dropdown()
 

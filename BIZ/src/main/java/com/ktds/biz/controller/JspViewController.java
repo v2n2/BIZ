@@ -46,6 +46,10 @@ public class JspViewController {
 	@RequestMapping(value = "/iframe/PretreatmentResult")
 	public void PretreatmentResult() {
 	}
+	
+	@RequestMapping(value = "/iframe/Dashboard")
+	public void DashboardSample() {
+	}
 
 	@RequestMapping(value = "/iframe/Learning")
 	public void Learning() {
@@ -86,6 +90,9 @@ public class JspViewController {
 	@RequestMapping(value = "/include/Dashboard")
 	public void Dashboard() {
 	}
+	@RequestMapping(value = "/admin/DashboardMgr")
+	public void DashboardMgr() {
+	}
 	@RequestMapping(value = "/admin/MenuAdmin")
 	public void MenuAdmin() {
 	}
@@ -97,6 +104,9 @@ public class JspViewController {
 	}
 	@RequestMapping(value = "/admin/CommonCodeAdmin")
 	public void CommonCode() {
+	}
+	@RequestMapping(value = "/admin/DashboardAdmin")
+	public void DashboardAdmin() {
 	}
 	//업무
 	@RequestMapping(value = "/callreport/CallReport")
@@ -117,6 +127,9 @@ public class JspViewController {
 	}
 	@RequestMapping(value = "/deal/DealLedgerRegist")
 	public void DealLedgerRegist() {
+	}
+	@RequestMapping(value = "/deal/DealDashboard")
+	public void DealDashboard() {
 	}
 	//기업고객 조회
 	@RequestMapping(value = "/epr/EprSearch")

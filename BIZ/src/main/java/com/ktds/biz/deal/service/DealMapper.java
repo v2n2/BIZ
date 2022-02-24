@@ -10,6 +10,8 @@ import com.ktds.biz.deal.model.Deal_sub01;
 public interface DealMapper {
 
 	Deal selectDeal(Deal_sub01 com);
+	List<Deal_sub01> searchAllDeal(Deal_sub01 com);
+	
 	List<Deal_sub01> selectDealPage(Deal_sub01 com);
 
 	Deal_sub01 SearchDealDtl(Deal_sub01 com);

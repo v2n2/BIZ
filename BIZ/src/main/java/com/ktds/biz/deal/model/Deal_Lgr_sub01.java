@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class Deal_Lgr_sub01 {
 	String deal_lgr_name;
 	String deal_lgr_no;
+	String biz_type;
 	String rm_emp_no;
 	String rm_emp_name;
 	String epr_name;
@@ -25,6 +26,7 @@ public class Deal_Lgr_sub01 {
 	String tot_isu_amn;
 	String isu_date;
 	String lead_mgr;
+	String lead_mgr_name;
 	String pcp_type;
 	String contract_date;
 	String due_date;
@@ -47,6 +49,9 @@ public class Deal_Lgr_sub01 {
 	String rgs_emp_no;
 	String before_date;
 	String after_date;
+	String bse_dt;
+	String biz_type_name;
+	String dept_name;
 	int page_st;
 	int page_end;
 }

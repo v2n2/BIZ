@@ -14,12 +14,14 @@ public class ScheduleTest {
 	@Autowired
 	CommonCodeService commonCodeService;
 	
-	/*
-	 * @Scheduled(fixedDelay = 10000) public void test() throws Exception{
-	 * CommonDtlCode com = new CommonDtlCode(); com.setGrp_cd("CAL_RPT_TYPE");
-	 * List<CommonDtlCode> a = commonCodeService.searchDtlCode2(com);
-	 * 
-	 * for(int i = 0 ; i <a.size();i++) { System.out.println(a.get(i).toString()); }
-	 * }
-	 */
+	/*@Scheduled(fixedDelay = 10000)
+	public void test() throws Exception{
+		CommonDtlCode com = new CommonDtlCode();
+		com.setGrp_cd("CAL_RPT_TYPE");
+		List<CommonDtlCode> a = commonCodeService.searchDtlCode2(com);
+		
+		for(int i = 0 ; i <a.size();i++) {
+			System.out.println(a.get(i).toString());
+		}
+	}*/
 }

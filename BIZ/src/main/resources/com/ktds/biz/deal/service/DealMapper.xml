@@ -4,7 +4,26 @@
 
 <mapper namespace="com.ktds.biz.deal.service.DealMapper">
 
-	
+	<select id="searchAllDeal" resultType="com.ktds.biz.deal.model.Deal_sub01">
+	  SELECT *
+		FROM  
+			S_DEAL a
+			left outer join S_USER b
+			on a.bse_emp_no = b.emp_no
+		WHERE
+		     1=1
+		<!-- 등록일  -->
+		<if test='before_date != null and before_date != "" and after_date != null and after_date != ""'>
+		 	
+		 	AND a.BSE_DT BETWEEN  #{before_date} AND #{after_date}
+		</if>
+		 <if test='deal_type != null and deal_type != "all"'>
+		 	AND a.DEAL_TYPE = #{deal_type}
+		 </if>
+		 <if test='biz_type != null and biz_type !="all"'>
+		 	AND a.BIZ_TYPE = #{biz_type}
+		 </if>
+    </select>	
     <select id="selectDealPageNum" resultType="_int">
 	  SELECT count(1)
 		FROM  
@@ -185,7 +204,7 @@
 		<if test='deal_lgr_name != null and deal_lgr_name != ""'>
 		 	AND a.DEAL_LGR_NAME = #{deal_lgr_name}
 		 </if>
-		 <if test='deal_no != null and deal_no != "all"'>
+		 <if test='deal_no != null and deal_no != ""'>
 		 	AND a.DEAL_NO = #{deal_no}
 		 </if>
 		 <if test='biz_type != null and biz_type !="all"'>
@@ -195,53 +214,67 @@
     
     <select id="SearchLgrDtl" resultType="com.ktds.biz.deal.model.Deal_Lgr_sub01">
  		 SELECT a.deal_lgr_no  as deal_lgr_no
-	  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
-	  		,a.biz_type as biz_type
-	  		,e.grp_dtl_name as biz_type_name
-	  		,a.deal_type as deal_type
-	  		,d.grp_dtl_name as deal_type_name
-	  		,a.deal_name as deal_name
-	  		,a.proc_type as proc_type
-	  		,c.grp_dtl_name as proc_name
-	  		,b.dept_name as dept_name
-	  		,b.emp_name as emp_name
-	  		,DATE_FORMAT (a.con_dt,'%Y-%m-%d') as con_dt
-	  		,DATE_FORMAT (a.end_dt,'%Y-%m-%d') as end_dt
-	  		,a.deal_proc_per as deal_proc_per
-	  		,a.exp_pri
-	  		,a.exp_rev
-	  		,a.deal_souc
-	  		,f.epr_name
-	  		,a.epr_no
+ 		,a.deal_no as deal_no
+ 		,e.deal_name as deal_name
+ 		,a.RM_EMP_NO as rm_emp_no
+ 		,a.deal_lgr_name as deal_lgr_name
+ 		,a.epr_no as epr_no
+ 		,f.EPR_NAME  as epr_name
+ 		,a.dbt_type as dbt_type
+ 		,a.sub_type as sub_type
+ 		,a.grt_yn as grt_yn
+ 		,a.tot_isu_amn as tot_isu_amn
+ 		,a.cur_cd as cur_cd
+ 		,a.isu_num as isu_num
+ 		,DATE_FORMAT (a.isu_date,'%Y-%m-%d') as isu_date
+ 		,a.lead_mgr as lead_mgr
+ 		,c.GRP_DTL_NAME as lead_mgr_name
+ 		,a.pcp_type as pcp_type
+ 		,DATE_FORMAT (a.contract_date,'%Y-%m-%d') as contract_date
+ 		,DATE_FORMAT (a.due_date,'%Y-%m-%d') as due_date
+ 		,a.due_year as due_year
+ 		,a.isu_yld as isu_yld
+ 		,a.surf_intr_rate as surf_intr_rate
+ 		,a.int_pay_mod as int_pay_mod
+ 		,a.coun_amt as coun_amt
+ 		,a.sal_pri as sal_pri
+ 		,a.conv_pri as conv_pri
+ 		,a.war_pri as war_pri
+ 		,DATE_FORMAT (a.war_pri_sta_date,'%Y-%m-%d')  as war_pri_sta_date
+ 		,DATE_FORMAT (a.war_pri_end_date,'%Y-%m-%d')  as war_pri_end_date
+ 		,a.cre_rat as cre_rat
+ 		,a.DESC_TEXT as desc_text 
+ 		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
+	  	,a.bse_emp_no as bse_emp_no
+	  	,b.EMP_NAME as emp_name
+	  	,d.emp_name as rm_emp_name
 		FROM  
-			S_DEAL a
+			S_DEAL_LGR a
 			left outer join S_USER b
 			on a.bse_emp_no = b.emp_no
 			left outer join S_GRP_DTL_CD c
-			on c.GRP_CD = 'PROC_TYPE'
-			and a.proc_type = c.grp_dtl_cd 
-			left outer join S_GRP_DTL_CD d
-			on d.GRP_CD = 'DEAL_TYPE'
-			and a.deal_type = d.grp_dtl_cd 
-			left outer join S_GRP_DTL_CD e
-			on e.GRP_CD = 'DEAL_BIZ_TYPE'
-			and a.biz_type = e.grp_dtl_cd
+			on c.GRP_CD = 'DEAL_LEAD_MGR'
+			and a.LEAD_MGR = c.grp_dtl_cd 
+			left outer join S_USER d
+			on a.rm_emp_no = d.emp_no
 			left outer join S_EPR f
-			on f.epr_no = a.epr_no 
+			on f.epr_no = a.epr_no
+			left outer join S_DEAL e
+			on a.deal_no = e.deal_no
 		WHERE
-			a.deal_no = #{deal_no}
+			a.DEAL_LGR_NO = #{deal_lgr_no}
     </select>
 
     <insert id="insertLgr">
-    	INSERT INTO S_DEAL_LGR (deal_lgr_name, deal_no, rm_emp_no, epr_no, dbt_type, sub_type,grt_yn, cur_cd, tot_isu_amn, isu_num, isu_date, lead_mgr, pcp_type, contract_date, ,due_date, due_year
+    	INSERT INTO S_DEAL_LGR (deal_lgr_name, deal_no, rm_emp_no, epr_no, dbt_type, sub_type,grt_yn, cur_cd, tot_isu_amn, isu_num, isu_date, lead_mgr, pcp_type, contract_date, due_date, due_year
     							,isu_yld, surf_intr_rate, int_pay_mod, coun_amt, sal_pri, conv_pri, war_pri, war_pri_sta_date, war_pri_end_date, cre_rat, desc_text, bse_dt, bse_tm, bse_emp_no, alt_dt, alt_tm, alt_emp_no)
-      	VALUES (#{deal_lgr_name}, #{deal_no}, #{rm_emp_no},#{epr_no},#{dbt_type},#{sub_type},#{cur_cd},#{tot_isu_amn},#{isu_num},#{isu_date},#{lead_mgr},#{pcp_type},#{contract_date},#{due_date},#{due_year},
+      	VALUES (#{deal_lgr_name}, #{deal_no}, #{rm_emp_no},#{epr_no},#{dbt_type},#{sub_type},#{grt_yn},#{cur_cd},#{tot_isu_amn},#{isu_num},#{isu_date},#{lead_mgr},#{pcp_type},#{contract_date},#{due_date},#{due_year},
       			#{isu_yld},#{surf_intr_rate},#{int_pay_mod},#{coun_amt},#{sal_pri},#{conv_pri},#{war_pri},#{war_pri_sta_date},#{war_pri_end_date},#{cre_rat},#{desc_text},DATE_FORMAT(now(), '%Y%m%d'), DATE_FORMAT(now(), '%H%i%s'), #{rgs_emp_no}, DATE_FORMAT(now(), '%Y%m%d'),DATE_FORMAT(now(), '%H%i%s'),#{rgs_emp_no})
     </insert>
     <update id="updateLgrByNo">
-    	UPDATE S_DEAL
+    	UPDATE S_DEAL_LGR
     	   SET deal_lgr_name = #{deal_lgr_name}
-      		   deal_no = #{deal_no}
+      		   ,deal_no = #{deal_no}
       		   ,rm_emp_no= #{rm_emp_no}
       		   ,epr_no = #{epr_no}
       		   ,dbt_type = #{dbt_type}
@@ -282,49 +315,41 @@
 		select *
 		from (
 			select <![CDATA[ (ROW_NUMBER() OVER()) as rnum ]]>
-			,aa.deal_no  as deal_no
+			,aa.deal_lgr_no  as deal_lgr_no
+			,aa.deal_lgr_name  as deal_lgr_name
+			,aa.deal_no as deal_no
+			,aa.deal_name as deal_name
 	  		,aa.bse_dt as bse_dt
 	  		,aa.biz_type as biz_type
 	  		,aa.biz_type_name as biz_type_name
-	  		,aa.deal_type as deal_type
-	  		,aa.deal_name as deal_name
-	  		,aa.proc_type as proc_type
-	  		,aa.proc_name as proc_name
 	  		,aa.dept_name as dept_name
 	  		,aa.emp_name as emp_name
-	  		,aa.deal_type_name as deal_type_name
 	  		,aa.epr_no as epr_no
 			,aa.epr_name as epr_name
 			from
 			(
-				 SELECT a.deal_no  as deal_no
+					 SELECT a.deal_lgr_no  as deal_lgr_no
 			  		,DATE_FORMAT (a.bse_dt,'%Y-%m-%d') as bse_dt
-			  		,a.biz_type as biz_type
+			  		,g.biz_type as biz_type
+			  		,a.deal_no as deal_no
+			  		,g.deal_name as deal_name
 			  		,e.grp_dtl_name as biz_type_name
-			  		,a.deal_type as deal_type
-			  		,d.grp_dtl_name as deal_type_name
-			  		,a.deal_name as deal_name
-			  		,a.proc_type as proc_type
-			  		,c.grp_dtl_name as proc_name
+			  		,a.deal_lgr_name as deal_lgr_name
 			  		,b.dept_name as dept_name
 			  		,b.emp_name as emp_name
 			  		,a.epr_no as epr_no
 			  		,f.epr_name as epr_name
 				FROM  
-					S_DEAL a
+					S_DEAL_LGR a
 					left outer join S_USER b
 					on a.bse_emp_no = b.emp_no
-					left outer join S_GRP_DTL_CD c
-					on c.GRP_CD = 'PROC_TYPE'
-					and a.proc_type = c.grp_dtl_cd 
-					left outer join S_GRP_DTL_CD d
-					on d.GRP_CD = 'DEAL_TYPE'
-					and a.deal_type = d.grp_dtl_cd 
+					left outer join S_EPR f
+					on a.epr_no = f.epr_no
+					left outer join S_DEAL g
+					on a.deal_no = g.deal_no
 					left outer join S_GRP_DTL_CD e
 					on e.GRP_CD = 'DEAL_BIZ_TYPE'
-					and a.biz_type = e.grp_dtl_cd 
-					left outer join S_EPR f
-					on f.epr_no = a.epr_no
+					and g.biz_type = e.grp_dtl_cd 
 				WHERE
 				    1=1
 				<!-- 등록일  -->
@@ -334,9 +359,6 @@
 				</if>
 				<if test='deal_name != null and deal_name != ""'>
 				 	AND a.DEAL_NAME = #{deal_name}
-				 </if>
-				 <if test='deal_type != null and deal_type != "all"'>
-				 	AND a.DEAL_TYPE = #{deal_type}
 				 </if>
 				 <if test='biz_type != null and biz_type !="all"'>
 				 	AND a.BIZ_TYPE = #{biz_type}

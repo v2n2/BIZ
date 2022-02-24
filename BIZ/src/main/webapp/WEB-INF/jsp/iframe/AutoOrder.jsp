@@ -636,7 +636,7 @@
 	<script src="/resources/js/ai_test_predict.js"></script>
 	<script type="text/javascript">
 		$(document).ready(function() {
-			campaignPage();
+		//	campaignPage();
 			//AI전처리 초기화
 			$('#ResultDataModal').on('hidden.bs.modal', function(e) {
 				$('#ai_staging_result').html('');

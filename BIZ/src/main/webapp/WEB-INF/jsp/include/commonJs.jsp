@@ -46,3 +46,14 @@
 <script src="/resources/dist/js/pages/dashboard.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="/resources/dist/js/demo.js"></script>
+<script
+		src="/resources/bower_components/select2/dist/js/select2.full.min.js"></script>
+	<!-- DataTables -->
+	<script
+		src="/resources/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+	<script
+		src="/resources/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+	<!-- twbsPagination :: https://github.com/josecebe/twbs-pagination -->
+	<script src="/resources/js/jquery.twbsPagination.min.js"></script>
+<script src="/resources/js/common.js"></script>
+<script src="/resources/bower_components/dsmorse-gridster/dist/jquery.dsmorse-gridster.min.js"></script>

@@ -71,8 +71,8 @@
 										<div class="col-md-4">
 												<div class="form-group">
 													<div class="col-sm-10">
-														<label for="name">Deal원장</label> <input type="text"
-															class="form-control" id="name" placeholder="제목">
+														<label for="deal_lgr_name">Deal원장</label> <input type="text"
+															class="form-control" id="deal_lgr_name" placeholder="제목">
 													</div>
 												</div>
 												<!-- /.form-group -->
@@ -81,8 +81,8 @@
 											<div class="col-md-4">
 												<div class="form-group">
 													<div class="col-sm-10">
-														<label for="name">Deal번호</label> <input type="text"
-															class="form-control" id="name" placeholder="번호">
+														<label for="deal_no">Deal번호</label> <input type="text"
+															class="form-control" id="deal_no" placeholder="번호">
 													</div>
 												</div>
 												<!-- /.form-group -->
@@ -90,8 +90,8 @@
 											<div class="col-md-4">
 												<div class="form-group">
 													<div class="col-sm-10">
-														<label for="type">영업구분</label> 
-														<select id="type"
+														<label for="biz_type">영업구분</label> 
+														<select id="biz_type"
 															class="form-control select2" style="width: 100%;">
 															<option selected="selected" value="all">전체</option>
 															<option value="HS">회사채</option>
@@ -118,8 +118,8 @@
 											<div class="col-md-4">
 												<div class="form-group">
 													<div class="col-sm-10">
-														<label for="corpName">기업명</label> <input type="text"
-															class="form-control" id="corpName" placeholder="기업명">
+														<label for="corp_name">기업명</label> <input type="text"
+															class="form-control" id="corp_name" placeholder="기업명">
 													</div>
 												</div>
 												<!-- /.form-group -->
@@ -139,7 +139,7 @@
 											<div class="col-md-4">
 												<div class="form-group">
 													<div class="col-sm-10">
-														<label for="type">작성부서</label> <select id="type"
+														<label for="dept_name">작성부서</label> <select id="dept_name"
 															class="form-control select2" style="width: 100%;">
 															<option selected="selected" value="all">전체</option>
 														</select>
@@ -153,7 +153,7 @@
 								</div>
 								<!-- /.box-body -->
 								<div class="box-footer">
-									<button type="button" onclick=""
+									<button type="button" onclick="getPagination()"
 										class="btn btn-info pull-right">검색</button>
 								</div>
 							</div>
@@ -185,20 +185,11 @@
 										<!--<th>조회수</th>-->
 									</tr>
 								</thead>
-								<tbody id="deal_list">
-									 <tr onClick="view_deal()">
-										<th style="width: 10%;text-align: center;font-weight:100;">0000001</th>
-										<th style="width: 15%;text-align: center;font-weight:100;">ktds</th>
-										<th style="width: 10%;text-align: center;font-weight:100;">회사채</th>
-										<th style="width: 15%;text-align: center;font-weight:100;">ktds회사채원장</th>
-										<th style="width: 10%;text-align: center;font-weight:100;">CRM사업팀</th>
-										<th style="width: 10%;text-align: center;font-weight:100;">임현빈</th>
-										<th style="width: 10%;text-align: center;font-weight:100;">2021-07-01</th>
-									</tr>
+								<tbody id="lgr_list">
 								</tbody>
 								</table>
 							<div class="text-center">
-								<ul class="pagination-sm" id="pagination_cam"></ul>
+								<ul class="pagination-sm" id="pagination"></ul>
 							</div>
 							<!-- Button trigger modal -->
 							<div class="box-footer">
@@ -215,15 +206,7 @@
 			<!-- /.Main content -->
 	<jsp:include page="../include/commonJs.jsp" />
 	<!-- DataTables -->
-	<script
-		src="/resources/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
-	<script
-		src="/resources/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
-	<!-- AI_CAMPAIGN JS -->
-	<script src="/resources/js/ai_campaign.js"></script>
-	<script src="/resources/js/ai_stageing_test.js"></script>
-	<!-- twbsPagination :: https://github.com/josecebe/twbs-pagination -->
-	<script src="/resources/js/jquery.twbsPagination.min.js"></script>
+		<script src="/resources/js/common.js"></script>
 	<script type="text/javascript">
 	!function(a) {
 		a.fn.datepicker.dates.kr = {
@@ -260,23 +243,66 @@
 		//search_statistics(); // 처음에 불러오기
 	});
 		$(document).ready(function() {
-			//자동 CallReport 검색
-			/* $("#adm_name").val("${sessionID}");
-			//campaignPage();
-			newCampaignPage();
-			//모달 처리(신규).
-			$("#bthAdd").click(function(event) {
-				//stop submit the form, we will post it manually.
-				event.preventDefault();
-				//alert('클릭 신규~!!');
-				submit_addStagingTest();
-			});
-			$('#addModal').on('show.bs.modal', function(event) {
-				//alert("currentValue :: " + currentValue);
-				$('#inputCamId').val(currentValue);
-				//alert("RealDataModal call!!");	 
-			}); */
+			nowPages = 1;
+			totalPages = 1;
+			visiblePages = 5;
+
+			page_st = 1;
+			page_end = 5;
+			pageSize = 10;
+
+			getPagination();
 		});
+		function getPagination() {
+			var obj = {};
+			
+			obj.before_date = $("input[id='before_date']")[0].value.replaceAll("-","");
+			obj.after_date = $("input[id='after_date']")[0].value.replaceAll("-","");
+			obj.deal_no = $("input[id='deal_no']")[0].value;
+			obj.biz_type = $("select[id='biz_type']")[0].value;
+			obj.dept_name = $("select[id='dept_name']")[0].value;
+			obj.corp_name = $("input[id='corp_name']")[0].value;
+			obj.emp_name = $("input[id='emp_name']")[0].value;
+			obj.deal_lgr_name = $("input[id='deal_lgr_name']")[0].value;
+			$.get({
+				url : '/deal/LgrPage',
+				data : obj,
+				async : 'true',
+				cache : false,
+				success : function(data) {
+
+					if (data[0] != "0") {
+						totalPages = Math.ceil(data[0] / pageSize);
+						grid_pagination(totalPages, visiblePages);
+
+					}else{
+						var div = document.querySelector('#lgr_list');
+						div.innerHTML =""; 
+					}
+				},
+				error : function(request, status, error) {
+				}
+			});
+		}
+
+		function grid_pagination(totalPages, visiblePages) {
+
+			$('#pagination').twbsPagination('destroy');
+			window.pagObj = $('#pagination').twbsPagination({
+				totalPages : totalPages,
+				visiblePages : visiblePages,
+				onPageClick : function(event, page) {
+					// alert("on1 " + page + ' (from event listening)');
+
+					page_st = ((1 * pageSize) * page) - (pageSize - 1);
+					page_end = (page_st + pageSize) - 1;
+
+					searchLgr(page_st, page_end);
+				}
+			}).on('page', function(event, page) {
+				// alert("on2 " + page + ' (from event listening)');
+			});
+		}
 		//등록화면 이동
 		function registLgr(){
 			//alert("call Content_NoticeBoard!!");
@@ -284,17 +310,18 @@
 			//최상위 메인프레임의 경로를 등록화면으로 이동
 			parent.document.getElementById("main_frame").src = "/deal/DealLedgerRegist";
 		}
-		function grid_table_notice(obj) {
-			var div = document.querySelector('#deal_list');
+		function grid_table_lgr(obj) {
+			//debugger;
+			var div = document.querySelector('#lgr_list');
 			var html = '';
-			$.each(obj, function(i, val) {
-										html += '<tr onClick="view_deal(' + val.deal_lgr_no + ')">';
+			$.each(obj.lgrList, function(i, val) {
+										html += '<tr onClick="detail_lgr(' + val.deal_lgr_no + ')">';
 										html += '<td style="text-align: center;font-weight:100;">' + val.deal_no	+ '</td>';
 										html += '<td style="text-align: center;font-weight:100;">' + val.epr_name	+ '</td>';
-										html += '<td style="text-align: center;font-weight:100;">' + val.biz_type_nm	+ '</td>';
+										html += '<td style="text-align: center;font-weight:100;">' + val.biz_type_name	+ '</td>';
 										html += '<td style="text-align: center;font-weight:100;">' + val.deal_lgr_name	+ '</td>';
 										html += '<td style="text-align: center;font-weight:100;">' + val.dept_name	+ '</td>';
-										html += '<td style="text-align: center;font-weight:100;">' + val.bse_emp_name	+ '</td>';
+										html += '<td style="text-align: center;font-weight:100;">' + val.emp_name	+ '</td>';
 										html += '<td style="text-align: center;font-weight:100;">' + val.bse_dt+ '</td>';
 								html += '</tr>';
 							});
@@ -303,11 +330,26 @@
 			// console.log("Tbody == " + html);
 			div.innerHTML = html;
 		}
-		function view_deal(){
-			parent.document.getElementById("main_frame").src = "/deal/DealLedgerRegist";
-		}
-		function detail_deal(deal_lgr_no){
+		
+		function detail_lgr(deal_lgr_no){
 			parent.document.getElementById("main_frame").src = "/deal/DealLedgerRegist?deal_lgr_no="+deal_lgr_no;
+		}
+		function searchLgr(page_st, page_end){
+			var obj = {};
+			var url = "";
+			obj.page_st = page_st;
+			obj.page_end = page_end;
+			obj.before_date = $("input[id='before_date']")[0].value.replaceAll("-","");
+			obj.after_date = $("input[id='after_date']")[0].value.replaceAll("-","");
+			obj.deal_no = $("input[id='deal_no']")[0].value;
+			obj.biz_type = $("select[id='biz_type']")[0].value;
+			obj.dept_name = $("select[id='dept_name']")[0].value;
+			obj.corp_name = $("input[id='corp_name']")[0].value;
+			obj.emp_name = $("input[id='emp_name']")[0].value;
+			obj.deal_lgr_name = $("input[id='deal_lgr_name']")[0].value;
+			url = "/deal/SearchLgr";
+			
+			transactionPost(url,obj,grid_table_lgr);
 		}
 	</script>
 </body>

@@ -9,6 +9,119 @@
 	content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 	name="viewport">
 <jsp:include page="../include/commonCss.jsp" />
+<style>
+#ds_campaign {
+	border-collapse: collapse;
+}
+
+.btn-bg-mint {
+	color: #fff;
+	background-color: #78C2AD;
+	border-color: #78C2AD;
+}
+
+.box-minty {
+	border-top-color: #78C2AD;
+}
+
+#ds_campaign td, #ds_campaign th {
+	padding: 20px;
+}
+
+#ds_campaign th {
+	background-color: #ccc;
+}
+
+#ds_campaign tr.selected {
+	background-color: navy;
+	color: #fff;
+	font-weight: bold;
+}
+
+.myAlert {
+	position: relative;
+	padding: 0.75rem 1.25rem;
+	margin-bottom: 1rem;
+	border: 1px solid transparent;
+	border-radius: 0.4rem;
+	padding-right: 4rem;
+	color: #38656f;
+	background-color: #e2f3f7;
+	border-color: #d6eef3;
+}
+
+.text-pink {
+	color: #F3734F;
+}
+
+.text-blue {
+	color: #5198FF;
+}
+
+.text-green {
+	color: #00B4AF;
+}
+
+.chart-container {
+	position: relative;
+	margin: auto;
+	height: auto;
+	width: 100%;
+}
+.img-arrow{
+	max-width: 100%;
+	min-width: 70%;
+  	height: auto;
+}
+
+.img-arrow2{
+	max-hight: 70%;
+	min-hight: 50%;
+  	wight: auto;
+  	margin-bottom: 20px;
+}
+.col-arrow{
+ width:1%; 
+ padding-top:8px;
+ float:left;
+ display: none;
+ 
+}
+
+.col-sm-2-1{
+
+  position: relative;
+
+  min-height: 1px;
+
+  padding-left: 1%;
+
+  padding-right: 1%;
+
+}
+.col-arrow2{
+		display: inline;
+	}
+
+@media (min-width: 768px){
+
+	.col-sm-2-1{
+
+	    width: 19%;
+
+	    float:left;
+
+	}
+	.col-arrow{
+		display: inline;
+	}
+	.img-arrow2{
+		display: none;
+	}
+
+}
+
+</style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini" style="height:100%">
 			<!-- Content Header (Page header) -->
@@ -24,6 +137,113 @@
 			</section>
 			<!-- 게시판 목록 -->
 			<section class="content" style="height:95%;overflow-y:scroll;">
+				<div class="row" id="deal_status_row" style="display:none;">
+						<!-- Default box -->
+						<div class="box">
+							<div class="box box-default">
+								<div class="box-header with-border">
+										<h3 class="box-title">Deal 프로세스</h3>
+									<div class="box-tools pull-right">
+										<button type="button" class="btn btn-box-tool"
+											data-widget="collapse" data-toggle="tooltip" title="Collapse">
+											<i class="fa fa-minus"></i>
+										</button>
+										<button type="button" class="btn btn-box-tool"
+											data-widget="remove" data-toggle="tooltip" title="Remove">
+											<i class="fa fa-times"></i>
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="box-body">
+								<div id="deal_status" class="row">
+									<div class="col-sm-2-1 text-center">
+										<div class="box box-default box-solid" id="MK">
+											<div class="box-header with-border">
+												<h3 class="box-title">마케팅</h3>
+											</div>
+											<!-- /.box-header -->
+											<!-- <div class="box-body">
+												<button id='id_loading1_msg' type="button" class="btn btn-default"
+													disabled="disabled">데이터 없음</button>
+											</div> -->
+											<!-- /.box-body -->
+										</div>
+										<img class="img-arrow2" src="/resources/dist/img/arrow2.png">
+									</div>
+									<div class="col-arrow">
+										<img class="img-arrow" src="/resources/dist/img/arrow1.png">
+									</div>
+									<!-- /.col -->
+									<div class="col-sm-2-1 text-center">
+										<div class="box box-default box-solid" id="SU">
+											<div class="box-header with-border">
+												<h3 class="box-title">제안</h3>
+											</div>
+											<!-- /.box-header -->
+
+											<!-- /.box-body -->
+										</div>
+										<img class="img-arrow2" src="/resources/dist/img/arrow2.png">
+									</div>
+									<div class="col-arrow">
+										<img class="img-arrow" src="/resources/dist/img/arrow1.png">
+									</div>
+									<!-- /.col -->
+									<div class="col-sm-2-1 text-center">
+										<div class="box box-default box-solid" id="CO">
+											<div class="box-header with-border">
+												<h3 class="box-title">계약체결</h3>
+											</div>
+											<!-- /.box-header -->
+											<!-- <div class="box-body">
+												<button id='id_pre_msg' type="button" class="btn btn-default"
+													disabled="disabled">데이터 없음</button>
+											</div> -->
+											<!-- /.box-body -->
+										</div>
+										<img class="img-arrow2" src="/resources/dist/img/arrow2.png">
+									</div>
+									<div class="col-arrow">
+										<img class="img-arrow" src="/resources/dist/img/arrow1.png">
+									</div>
+									<!-- /.col -->
+									<div class="col-sm-2-1 text-center">
+										<div class="box box-default box-solid" id="PR">
+											<div class="box-header with-border">
+												<h3 class="box-title">계약 후 실무</h3>
+											</div>
+											<!-- /.box-header -->
+											<!-- <div class="box-body">
+												<button type="button" class="btn btn-default"
+													disabled="disabled">데이터 없음</button>
+											</div> -->
+											<!-- /.box-body -->
+										</div>
+										<img class="img-arrow2" src="/resources/dist/img/arrow2.png">
+									</div>
+									<div class="col-arrow">
+										<img class="img-arrow" src="/resources/dist/img/arrow1.png">
+									</div>
+									<!-- /.col -->
+									<div class="col-sm-2-1 text-center">
+										<div class="box box-default box-solid" id="DO">
+											<div class="box-header with-border">
+												<h3 class="box-title">완료</h3>
+											</div>
+											<!-- /.box-header -->
+											<!-- <div class="box-body">
+												<button type="button" class="btn btn-default"
+													disabled="disabled">데이터 없음</button>
+											</div> -->
+											<!-- /.box-body -->
+											
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>	
 				<div class="row">
 					<div class="col-xs-12">
 						<div class="box">
@@ -312,7 +532,6 @@
 									</div>
 								</div>
 						</div>
-					</div>
 			</section>
 	<jsp:include page="../include/commonJs.jsp" />
 	<!-- ChartJS -->
@@ -375,14 +594,16 @@
 				// console.log('modal open');
 			});
 			var deal_no = document.getElementById("deal_no").value;
+			
 			if(!isEmpty(deal_no)){
+			    $('#deal_status_row').removeAttr("style");
 				var obj = {};
 				obj.deal_no = $("input[id='deal_no']")[0].value;
 				var url = "/deal/SearchDealDtl";
 				
 				transactionGet(url,obj,function(obj){
 					$("input[id='deal_name']")[0].value= obj.deal_name ;
-					debugger;
+					//debugger;
 					//타입
 					const dealNodeList = document.getElementsByName('deal_type');
 					dealNodeList.forEach((node) => {
@@ -398,14 +619,17 @@
 							node.checked = true;	
 						}
 					})
+					$('#'+obj.proc_type).removeClass("box-default");
+					$('#'+obj.proc_type).addClass("btn-bg-mint");
+					
 					$("input[id='con_dt']")[0].value				= obj.con_dt;
 					$("input[id='end_dt']")[0].value 				= obj.end_dt;
-					$("input[id='deal_proc_per']")[0].value         = obj.deal_proc_per; 
+					$("input[id='deal_proc_per']")[0].value         = obj.deal_proc_per;
 					$("input[id='exp_pri']")[0].value             = obj.exp_pri ;
 					$("input[id='exp_rev']")[0].value             = obj.exp_rev ;
 					$("input[id='deal_souc']")[0].value             = obj.deal_souc ;
 					$("input[id='epr_name']")[0].value             = obj.epr_name ;
-					//$("input[id='emp_name']")[0].value             	= obj.emp_name ;
+					$("input[id='epr_no']")[0].value             	= obj.epr_no ;
 					var select_type = $('#biz_type').children();
 					$.each(select_type,function(ii,dd){
 						if(dd.value == obj.biz_type){
@@ -435,7 +659,7 @@
 			})
 			obj.deal_name = $("input[id='deal_name']")[0].value;
 			obj.biz_type = $("#biz_type  option:selected").val();
-			debugger;
+			//debugger;
 			obj.drop_yn = "N";
 			if($("#drop").is(":checked")){
 				obj.drop_yn = "Y";

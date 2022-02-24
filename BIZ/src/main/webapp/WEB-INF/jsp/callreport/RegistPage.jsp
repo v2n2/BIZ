@@ -643,7 +643,7 @@
 			
 			transactionGet(url,obj,function(o){
 				$("input[id='rpt_name']")[0].value= o.rpt_name ;
-				debugger;
+				//debugger;
 				//타입
 				const bizNodeList = document.getElementsByName('rpt_type');
 				bizNodeList.forEach((node) => {

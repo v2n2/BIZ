@@ -125,4 +125,9 @@ public class DealService implements DealMapper {
 		return dealMapper.SearchLgrDtl(com);
 	}
 
+	@Override
+	public List<Deal_sub01> searchAllDeal(Deal_sub01 com) {
+		return dealMapper.searchAllDeal(com);
+	}
+
 }
